@@ -3,10 +3,26 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FFA_Clustering"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
+        Title="FFA Clustering" Height="350" Width="525" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" WindowState="Maximized">
+    <Grid x:Name="MainGrid">
+        <Canvas x:Name="CanvasMain" Margin="190,10,10,10" Background="#FFF5EDED" MouseUp="CanvasMain_MouseUp"/>
+        <Button x:Name="ButtonDrawPoints" Content="Draw points" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="ButtonDrawPoints_Click" IsDefault="True"/>
+        <GroupBox x:Name="GroupBoxDrawPoints" Header="Draw points properties" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Height="190" Width="175" BorderThickness="2" SizeChanged="GroupBoxDrawPoints_SizeChanged">
+            <Grid Margin="0,10,-2,3">
+                <TextBox x:Name="TextBoxPointsPerClick" HorizontalAlignment="Left" Height="23" Margin="10,27,0,0" TextWrapping="Wrap" Text="50" VerticalAlignment="Top" Width="90" PreviewTextInput="CheckTextForInt"/>
+                <TextBox x:Name="TextBoxDispersion" HorizontalAlignment="Left" Height="23" Margin="10,81,0,0" TextWrapping="Wrap" Text="200" VerticalAlignment="Top" Width="90" PreviewTextInput="CheckTextForInt"/>
+                <Label x:Name="LabelPointsPerClick" Content="Points per click" HorizontalAlignment="Left" Margin="10,1,0,0" VerticalAlignment="Top" Width="90"/>
+                <Label x:Name="LabelDispersion" Content="Dispersion" HorizontalAlignment="Left" Margin="10,55,0,0" VerticalAlignment="Top" Width="90"/>
+                <RadioButton x:Name="RadioButtonDispersionAsCircle" Content="Dispersion as circle" HorizontalAlignment="Left" Margin="10,109,0,0" VerticalAlignment="Top" IsChecked="True"/>
+                <RadioButton x:Name="RadioButtonDispersionAsSquare" Content="Dispersion as square" HorizontalAlignment="Left" Margin="10,129,0,0" VerticalAlignment="Top" IsChecked="True"/>
+            </Grid>
+        </GroupBox>
+        <Grid x:Name="BottomGrid" HorizontalAlignment="Left" Height="265" Margin="0,230,0,0" VerticalAlignment="Top" Width="190">
+            <Button x:Name="ButtonClear" Content="Clear" HorizontalAlignment="Left" Margin="10,0,0,0" Width="110" Height="20" VerticalAlignment="Top" Click="ButtonClear_Click"/>
+            <Button x:Name="ButtonMakeClusters" Content="Make clusters" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Width="110" Click="ButtonMakeClusters_Click"/>
+            <TextBox x:Name="TextBoxClustersNumber" HorizontalAlignment="Left" Height="23" Margin="10,50,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="120" PreviewTextInput="CheckTextForInt"/>
+        </Grid>
+
     </Grid>
 </Window>
