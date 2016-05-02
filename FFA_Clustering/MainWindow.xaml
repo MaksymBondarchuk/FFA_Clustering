@@ -23,6 +23,7 @@
             <Button x:Name="ButtonMakeClusters" Content="Make clusters" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Width="110" Click="ButtonMakeClusters_Click"/>
             <TextBox x:Name="TextBoxClustersNumber" HorizontalAlignment="Left" Height="23" Margin="10,50,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="120" PreviewTextInput="CheckTextForInt"/>
             <TextBox x:Name="TextBoxSilhouetteMethod" HorizontalAlignment="Left" Height="23" Margin="10,100,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+            <Button x:Name="ButtonRun" Content="Run" HorizontalAlignment="Left" Margin="10,128,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRun_Click"/>
         </Grid>
         <Menu Height="20" VerticalAlignment="Top" Background="White">
             <MenuItem Header="File">

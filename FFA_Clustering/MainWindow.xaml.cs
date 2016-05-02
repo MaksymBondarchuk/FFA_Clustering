@@ -282,5 +282,14 @@ namespace FFA_Clustering
                 Keyboard.IsKeyDown(Key.O))
                 MenuItemOpen.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
         }
+
+        private void ButtonRun_Click(object sender, RoutedEventArgs e)
+        {
+            var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
+            var firefly = Alghorithm.Run(10, clustersNumber);
+
+            TextBoxSilhouetteMethod.Text = Alghorithm.SilhouetteMethod(firefly).ToString(CultureInfo.InvariantCulture);
+            Draw();
+        }
     }
 }

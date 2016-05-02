@@ -70,6 +70,10 @@ namespace FFA_Clustering
             if (firefly == null)
                 return double.MinValue;
 
+            for (var i = 0; i < firefly.Centroids.Count; i++)
+                foreach (var pointIdx in firefly.CentroidPoints[i])
+                    Points[pointIdx].BelongsToCentroid = i;
+
             var s = 0.0;
             foreach (var point in Points)
             {
@@ -128,6 +132,44 @@ namespace FFA_Clustering
             }
 
             return r / firefly.Centroids.Count;
+        }
+
+        public Firefly Run(int firefliesNumber, int clustersNumber)
+        {
+            AddRandomFireflies(firefliesNumber, clustersNumber);
+            const int maximumGenerations = 1;
+            var delta = Math.Pow(1e-4 / 1.09, 1.0 / maximumGenerations);
+
+            var bestEver = Sse(Fireflies.First());
+            for (long iter = 0; iter < maximumGenerations; iter++)
+            {
+                var alphaT = 1e-3 * Math.Pow(delta, iter);
+
+                for (var i = 0; i < Fireflies.Count; i++)
+                {
+                    for (var j = 0; j < Fireflies.Count; j++)
+                    {
+                        if (i == j || Fireflies[i].Sse < Fireflies[j].Sse)
+                            continue;
+
+                        var lambdaI = .5 - i * (.5 - 1.9) / (Fireflies.Count - 1);
+                        Fireflies[i].MoveTowards(Fireflies[j], alphaT, lambdaI);
+                        Fireflies[i].Sse = Sse(Fireflies[i]);
+                    }
+                }
+
+                RankSwarm();
+                //var bestIter = Fireflies.Min(ff => ff.Sse);
+                //if (bestIter < bestEver)
+                //    bestEver = bestIter;
+            }
+
+            return Fireflies.FirstOrDefault();
+        }
+
+        private void RankSwarm()
+        {
+            Fireflies.Sort((f1, f2) => f1.Sse.CompareTo(f2.Sse));
         }
     }
 }
