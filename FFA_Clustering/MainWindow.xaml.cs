@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using System.Web.Script.Serialization;
 
 namespace FFA_Clustering
 {
@@ -156,11 +158,37 @@ namespace FFA_Clustering
                 {
                     Stroke = new SolidColorBrush(colors[i]),
                     Fill = new SolidColorBrush(colors[i]),
-                    Width = 4*HalfPointSize,
-                    Height = 4*HalfPointSize,
+                    Width = 4 * HalfPointSize,
+                    Height = 4 * HalfPointSize,
                     Margin = new Thickness(fireflyPoint.X[0] - HalfPointSize, fireflyPoint.X[1] - HalfPointSize, 0, 0)
                 });
             }
+        }
+
+        private void MenuItemSave_Click(object sender, RoutedEventArgs e)
+        {
+            var obj = new JsonObject
+            {
+                IsClustered = true,
+                Points = Alghorithm.Points,
+                Fireflies = Alghorithm.Fireflies
+            };
+            var json = new JavaScriptSerializer().Serialize(obj);
+            //Console.WriteLine(json);
+            var file = new StreamWriter("C:\\Users\\Max\\Downloads\\Test.json");
+            file.WriteLine(json);
+            file.Close();
+        }
+
+        private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
+        {
+            var file = new StreamReader("C:\\Users\\Max\\Downloads\\Test.json");
+            var json = file.ReadToEnd();
+
+            var deserializer = new JavaScriptSerializer();
+            var results = deserializer.Deserialize<JsonObject>(json);
+
+            file.Close();
         }
     }
 }

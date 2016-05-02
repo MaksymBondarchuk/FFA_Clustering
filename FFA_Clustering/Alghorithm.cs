@@ -17,20 +17,27 @@ namespace FFA_Clustering
 
         private Random Rand { get; } = new Random();
 
+        private void AddRandomFireflies(int firefliesNumber, int clustersNumber)
+        {
+            for (var iter = 0; iter < firefliesNumber; iter++)
+            {
+                var firefly = new Firefly();
+                for (var i = 0; i < clustersNumber; i++)
+                {
+                    var point = new ClusterPoint {IsCentroid = true};
+                    point.X.Add(Rand.Next((int) RangeX.X, (int) RangeX.Y));
+                    point.X.Add(Rand.Next((int) RangeY.X, (int) RangeY.Y));
+                    firefly.Centroids.Add(point);
+                }
+                Fireflies.Add(firefly);
+            }
+        }
+
         public void Test(int clustersNumber)
         {
             Fireflies.Clear();
 
-            var firefly = new Firefly();
-            for (var i = 0; i < clustersNumber; i++)
-            {
-                var point = new ClusterPoint { IsCentroid = true };
-                point.X.Add(Rand.Next((int)RangeX.X, (int)RangeX.Y));
-                point.X.Add(Rand.Next((int)RangeY.X, (int)RangeY.Y));
-                firefly.Centroids.Add(point);
-            }
-            Fireflies.Add(firefly);
-
+            AddRandomFireflies(1, clustersNumber);
 
             foreach (var point in Points)
             {
