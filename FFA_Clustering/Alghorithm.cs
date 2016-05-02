@@ -122,20 +122,6 @@ namespace FFA_Clustering
                     (t - firefly.Centroids[i].X[j]) * (t - firefly.Centroids[i].X[j])).Sum();
                     rLocal += Math.Sqrt(r2Local);
                 }
-                rLocal /= firefly.CentroidPoints[i].Count;
-                r += rLocal;
-            }
-
-            r = 0;
-            for (var i = 0; i < firefly.Centroids.Count; i++)
-            {
-                var rLocal = 0.0;
-                foreach (var pointIdx in firefly.CentroidPoints[i])
-                {
-                    var r2Local = Points[pointIdx].X.Select((t, j) =>
-                    (t - firefly.Centroids[i].X[j]) * (t - firefly.Centroids[i].X[j])).Sum();
-                    rLocal += Math.Sqrt(r2Local);
-                }
                 if (firefly.CentroidPoints[i].Count != 0)
                     rLocal /= firefly.CentroidPoints[i].Count;
                 r += rLocal;
