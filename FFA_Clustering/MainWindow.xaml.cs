@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -141,6 +142,7 @@ namespace FFA_Clustering
             CanvasMain.Children.Clear();
 
             Application.Current.Resources["IsMenuItemSaveEnabled"] = false;
+            TextBoxSilhouetteMethod.Text = string.Empty;
         }
 
         private void GroupBoxDrawPoints_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -164,33 +166,9 @@ namespace FFA_Clustering
             CanvasMain.Children.Clear();
             Draw();
 
-            //var colors = new List<Color>();
-            //for (var i = 0; i < clustersNumber; i++)
-            //    colors.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
-
-            //foreach (var point in Alghorithm.Points)
-            //    CanvasMain.Children.Add(new Rectangle
-            //    {
-            //        Stroke = new SolidColorBrush(colors[point.BelongsToCentroid]),
-            //        Fill = new SolidColorBrush(colors[point.BelongsToCentroid]),
-            //        Width = 2 * HalfPointSize,
-            //        Height = 2 * HalfPointSize,
-            //        Margin = new Thickness(point.X[0] - HalfPointSize, point.X[1] - HalfPointSize, 0, 0)
-            //    });
-
-            //for (var i = 0; i < Alghorithm.Fireflies[0].Centroids.Count; i++)
-            ////foreach (var fireflyPoint in Alghorithm.Fireflies[0].Centroids)
-            //{
-            //    var fireflyPoint = Alghorithm.Fireflies[0].Centroids[i];
-            //    CanvasMain.Children.Add(new Rectangle
-            //    {
-            //        Stroke = new SolidColorBrush(colors[i]),
-            //        Fill = new SolidColorBrush(colors[i]),
-            //        Width = 4 * HalfPointSize,
-            //        Height = 4 * HalfPointSize,
-            //        Margin = new Thickness(fireflyPoint.X[0] - HalfPointSize, fireflyPoint.X[1] - HalfPointSize, 0, 0)
-            //    });
-            //}
+            TextBoxSilhouetteMethod.Text = 
+                Alghorithm.Sse(Alghorithm.Fireflies.FirstOrDefault()).
+                ToString(CultureInfo.InvariantCulture);
         }
 
         private void Draw()
@@ -206,8 +184,8 @@ namespace FFA_Clustering
                 {
                     Stroke = new SolidColorBrush(pointColor),
                     Fill = new SolidColorBrush(pointColor),
-                    Width = 2*HalfPointSize,
-                    Height = 2*HalfPointSize,
+                    Width = 2 * HalfPointSize,
+                    Height = 2 * HalfPointSize,
                     Margin = new Thickness(point.X[0] - HalfPointSize, point.X[1] - HalfPointSize, 0, 0)
                 });
             }
@@ -296,7 +274,7 @@ namespace FFA_Clustering
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if ((Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) && 
+            if ((Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) &&
                 Keyboard.IsKeyDown(Key.S))
                 MenuItemSave.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
 
