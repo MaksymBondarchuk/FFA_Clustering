@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace FFA_Clustering
@@ -8,17 +9,21 @@ namespace FFA_Clustering
     public class Alghorithm
     {
         //public double SilhouetteMethod { get; set; }
+        public const int MaximumGenerations = 100;
+
+        private double Delta { get; set; }
+
+        private Random Rand { get; } = new Random();
 
         public Point RangeX { get; set; }
         public Point RangeY { get; set; }
 
-        public int Dimension { get; set; }
+        public int Dimension { get; set; } = 2;
 
         public List<ClusterPoint> Points { get; set; } = new List<ClusterPoint>();
 
         public List<Firefly> Fireflies { get; set; } = new List<Firefly>();
 
-        private Random Rand { get; } = new Random();
 
         private void AddRandomFireflies(int firefliesNumber, int clustersNumber)
         {
@@ -33,9 +38,11 @@ namespace FFA_Clustering
                     firefly.Centroids.Add(point);
                     firefly.CentroidPoints.Add(new List<int>());
                 }
+                firefly.SumOfSquaredError = SumOfSquaredError(firefly);
                 Fireflies.Add(firefly);
             }
         }
+
 
         public void Test(int clustersNumber)
         {
@@ -65,111 +72,186 @@ namespace FFA_Clustering
             //SilhouetteMethod = SilhouetteMethod(Fireflies.FirstOrDefault());
         }
 
+        public void UpdatePoints(Firefly firefly)
+        {
+            for (var i = 0; i < firefly.Centroids.Count; i++)
+                foreach (var pointIdx in firefly.CentroidPoints[i])
+                    Points[pointIdx].BelongsToCentroid = i;
+        }
+
         public double SilhouetteMethod(Firefly firefly)
         {
             if (firefly == null)
                 return double.MinValue;
 
-            for (var i = 0; i < firefly.Centroids.Count; i++)
-                foreach (var pointIdx in firefly.CentroidPoints[i])
-                    Points[pointIdx].BelongsToCentroid = i;
+            //UpdatePoints(firefly);
 
             var s = 0.0;
-            foreach (var point in Points)
-            {
-                var a = 0.0;
-                var brothers = 0;
-                foreach (var brother in Points)
-                {
-                    if (brother.BelongsToCentroid != point.BelongsToCentroid) continue;
-                    var r = point.X.Select((t, i) => (t * brother.X[i]) * (t * brother.X[i])).Sum();
-                    a += Math.Sqrt(r);
-                    brothers++;
-                }
-                a /= brothers;
-
-                var b = double.MaxValue;
-                for (var i = 0; i < firefly.Centroids.Count; i++)
-                {
-                    if (i == point.BelongsToCentroid) continue;
-                    var bLocal = 0.0;
-                    var neighbours = 0;
-                    foreach (var neighbour in Points)
-                    {
-                        if (neighbour.BelongsToCentroid != i) continue;
-                        var r = point.X.Select((t, j) => (t * neighbour.X[j]) * (t * neighbour.X[j])).Sum();
-                        bLocal += Math.Sqrt(r);
-                        neighbours++;
-                    }
-                    bLocal /= neighbours;
-                    if (bLocal < b)
-                        b = bLocal;
-                }
-
-                s += (b - a) / Math.Max(a, b);
-            }
-            return s;
-        }
-
-        public double Sse(Firefly firefly)
-        {
-            if (firefly == null)
-                return double.MaxValue;
-
-            var r = 0.0;
             for (var i = 0; i < firefly.Centroids.Count; i++)
             {
-                var rLocal = 0.0;
-                foreach (var pointIdx in firefly.CentroidPoints[i])
+                foreach (var cpI in firefly.CentroidPoints[i])
                 {
-                    var r2Local = Points[pointIdx].X.Select((t, j) =>
-                    (t - firefly.Centroids[i].X[j]) * (t - firefly.Centroids[i].X[j])).Sum();
-                    rLocal += Math.Sqrt(r2Local);
+                    var a = firefly.CentroidPoints[i].Where(cpJ => cpI != cpJ).Sum(cpJ => Points[cpI].DistTo(Points[cpJ]));
+
+                    var b = 0.0;
+                    for (var j = 0; j < firefly.Centroids.Count; j++)
+                    {
+                        if (i == j) continue;
+                        b += firefly.CentroidPoints[j].Sum(cpJ => Points[cpI].DistTo(Points[cpJ]));
+                    }
+
+                    s += (b - a) / Math.Max(a, b);
                 }
-                if (firefly.CentroidPoints[i].Count != 0)
-                    rLocal /= firefly.CentroidPoints[i].Count;
-                r += rLocal;
+            }
+            return s / Points.Count;
+        }
+
+        public double SumOfSquaredError(Firefly firefly)
+        {
+            var sse = 0.0;
+            for (var pIndex = 0; pIndex < Points.Count; pIndex++)
+            {
+                var point = Points[pIndex];
+                var distMin = double.MaxValue;
+                var indexOfMinCentroid = -1;
+                for (var i = 0; i < firefly.Centroids.Count; i++)
+                {
+                    var r2 = point.X.Select((t, j) => (t - firefly.Centroids[i].X[j]) * (t - firefly.Centroids[i].X[j])).Sum();
+                    if (distMin < r2) continue;
+                    distMin = r2;
+                    indexOfMinCentroid = i;
+                }
+                sse += distMin;
+                firefly.CentroidPoints[indexOfMinCentroid].Add(pIndex);
             }
 
-            return r / firefly.Centroids.Count;
+            return sse;
+        }
+
+        public void Itialization(int firefliesNumber, int clustersNumber)
+        {
+            Fireflies.Clear();
+            Delta = Math.Pow(1e-4 / 1.09, 1.0 / MaximumGenerations);
+
+            AddRandomFireflies(firefliesNumber, clustersNumber);
+            RankSwarm();
+        }
+
+        public async Task Iteration(int number)
+        {
+            var alphaT = 1e-3 * Math.Pow(Delta, number);
+
+            for (var i = 0; i < Fireflies.Count; i++)
+            {
+                for (var j = 0; j < Fireflies.Count; j++)
+                {
+                    if (i == j || Fireflies[i].SumOfSquaredError < Fireflies[j].SumOfSquaredError)
+                        continue;
+
+                    var lambdaI = .5 - i * (.5 - 1.9) / (Fireflies.Count - 1);
+                    MoveTowards(Fireflies[i], Fireflies[j], alphaT, lambdaI);
+                    Fireflies[i].SumOfSquaredError = SumOfSquaredError(Fireflies[i]);
+                }
+            }
+
+            RankSwarm();
+            await Task.Delay(0);
         }
 
         public Firefly Run(int firefliesNumber, int clustersNumber)
         {
-            AddRandomFireflies(firefliesNumber, clustersNumber);
-            const int maximumGenerations = 1;
-            var delta = Math.Pow(1e-4 / 1.09, 1.0 / maximumGenerations);
+            //AddRandomFireflies(firefliesNumber, clustersNumber);
+            ////const int maximumGenerations = 1;
+            //var delta = Math.Pow(1e-4 / 1.09, 1.0 / MaximumGenerations);
 
-            var bestEver = Sse(Fireflies.First());
-            for (long iter = 0; iter < maximumGenerations; iter++)
-            {
-                var alphaT = 1e-3 * Math.Pow(delta, iter);
+            //RankSwarm();
 
-                for (var i = 0; i < Fireflies.Count; i++)
-                {
-                    for (var j = 0; j < Fireflies.Count; j++)
-                    {
-                        if (i == j || Fireflies[i].Sse < Fireflies[j].Sse)
-                            continue;
+            //for (long iter = 0; iter < MaximumGenerations; iter++)
+            //{
+            //    var alphaT = 1e-3 * Math.Pow(delta, iter);
 
-                        var lambdaI = .5 - i * (.5 - 1.9) / (Fireflies.Count - 1);
-                        Fireflies[i].MoveTowards(Fireflies[j], alphaT, lambdaI);
-                        Fireflies[i].Sse = Sse(Fireflies[i]);
-                    }
-                }
+            //    for (var i = 0; i < Fireflies.Count; i++)
+            //    {
+            //        for (var j = 0; j < Fireflies.Count; j++)
+            //        {
+            //            if (i == j || Fireflies[i].SumOfSquaredError < Fireflies[j].SumOfSquaredError)
+            //                continue;
 
-                RankSwarm();
-                //var bestIter = Fireflies.Min(ff => ff.Sse);
-                //if (bestIter < bestEver)
-                //    bestEver = bestIter;
-            }
+            //            var lambdaI = .5 - i * (.5 - 1.9) / (Fireflies.Count - 1);
+            //            Fireflies[i].MoveTowards(Fireflies[j], alphaT, lambdaI);
+            //            Fireflies[i].SumOfSquaredError = SumOfSquaredError(Fireflies[i]);
+            //        }
+            //    }
+
+            //    RankSwarm();
+            //}
 
             return Fireflies.FirstOrDefault();
         }
 
         private void RankSwarm()
         {
-            Fireflies.Sort((f1, f2) => f1.Sse.CompareTo(f2.Sse));
+            Fireflies.Sort((f1, f2) => f1.SumOfSquaredError.CompareTo(f2.SumOfSquaredError));
+        }
+
+        public void MoveTowards(Firefly firefly, Firefly fireflyTo, double alpha, double lambda)
+        {
+            for (var i = 0; i < firefly.Centroids.Count; i++)
+            {
+                var r2 = firefly.Centroids[i].X.Select((t, h) =>
+                (t - fireflyTo.Centroids[i].X[h]) * (t - fireflyTo.Centroids[i].X[h])).Sum();
+
+                var brightness = .5 / (1 + 1e-4 * r2);
+                for (var h = 0; h < firefly.Centroids[i].X.Count; h++)
+                {
+                    var randomPart = alpha * (Rand.NextDouble() - .5) * MantegnaRandom(lambda);
+                    firefly.Centroids[i].X[h] += brightness * (fireflyTo.Centroids[i].X[h] - firefly.Centroids[i].X[h]) + randomPart;
+                }
+
+                if (firefly.Centroids[i].X[0] < RangeX.X)
+                    firefly.Centroids[i].X[0] = RangeX.X;
+                else
+                if (firefly.Centroids[i].X[0] > RangeX.Y)
+                    firefly.Centroids[i].X[0] = RangeX.Y;
+                if (firefly.Centroids[i].X[1] < RangeY.X)
+                    firefly.Centroids[i].X[1] = RangeY.X;
+                else
+                if (firefly.Centroids[i].X[1] > RangeY.Y)
+                    firefly.Centroids[i].X[1] = RangeY.Y;
+
+                firefly.SumOfSquaredError = SumOfSquaredError(firefly);
+            }
+        }
+
+
+        private double GaussianRandom(double mue, double sigma)
+        {
+            double x1;
+            double w;
+            const int randMax = 0x7fff;
+            do
+            {
+                x1 = 2.0 * Rand.Next(randMax) / (randMax + 1) - 1.0;
+                var x2 = 2.0 * Rand.Next(randMax) / (randMax + 1) - 1.0;
+                w = x1 * x1 + x2 * x2;
+            } while (w >= 1.0);
+            // ReSharper disable once IdentifierTypo
+            var llog = Math.Log(w);
+            w = Math.Sqrt((-2.0 * llog) / w);
+            var y = x1 * w;
+            return mue + sigma * y;
+        }
+
+        private double MantegnaRandom(double lambda)
+        {
+            var sigmaX = SpecialFunction.lgamma(lambda + 1) * Math.Sin(Math.PI * lambda * .5);
+            var divider = SpecialFunction.lgamma(lambda * .5) * lambda * Math.Pow(2.0, (lambda - 1) * .5);
+            sigmaX /= divider;
+            var lambda1 = 1.0 / lambda;
+            sigmaX = Math.Pow(Math.Abs(sigmaX), lambda1);
+            var x = GaussianRandom(0, sigmaX);
+            var y = Math.Abs(GaussianRandom(0, 1.0));
+            return x / Math.Pow(y, lambda1);
         }
     }
 }

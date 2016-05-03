@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -35,12 +36,14 @@ namespace FFA_Clustering
     /// </summary>
     public partial class MainWindow
     {
+        private const int GroupBoxDrawPointsHeight = 190;
+        private const int HalfPointSize = 2;
+
         public bool IsInDrawPointsMode { get; set; }
         public Alghorithm Alghorithm { get; set; }
         public Random Rand { get; } = new Random();
 
-        private const int GroupBoxDrawPointsHeight = 190;
-        private const int HalfPointSize = 2;
+        private int Shit { get; set; } = 0;
         //private bool IsMenuItemSaveEnabled = false;
 
         public MainWindow()
@@ -88,6 +91,47 @@ namespace FFA_Clustering
 
         private void CanvasMain_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (!IsInDrawPointsMode)
+            {
+                var p = Mouse.GetPosition(CanvasMain);
+                Shit++;
+                if (Shit > 5)
+                    return;
+
+                if (Shit == 1)
+                {
+                    var firefly = new Firefly();
+                    var point = new ClusterPoint {IsCentroid = true};
+                    point.X.Add(p.X);
+                    point.X.Add(p.Y);
+                    firefly.Centroids.Add(point);
+                    firefly.CentroidPoints.Add(new List<int>());
+                    Alghorithm.Fireflies.Add(firefly);
+                    return;
+                }
+
+                var ff = Alghorithm.Fireflies.First();
+
+                var pnt = new ClusterPoint {IsCentroid = true};
+                pnt.X.Add(p.X);
+                pnt.X.Add(p.Y);
+                ff.Centroids.Add(pnt);
+                ff.CentroidPoints.Add(new List<int>());
+
+                if (Shit == 5)
+                {
+                    ff.SumOfSquaredError = Alghorithm.SumOfSquaredError(ff);
+                    CanvasMain.Children.Clear();
+                    Draw();
+
+                    TextBoxSilhouetteMethod.Text =
+                        Alghorithm.SilhouetteMethod(Alghorithm.Fireflies.FirstOrDefault()).
+                            ToString(CultureInfo.InvariantCulture);
+                    TextBoxSumOfSquaredError.Text =
+                        Alghorithm.Fireflies.First().SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+                }
+            }
+
             if (!IsInDrawPointsMode ||
                 TextBoxDispersion.Text.Equals(string.Empty) ||
                 TextBoxPointsPerClick.Text.Equals(string.Empty))
@@ -154,8 +198,6 @@ namespace FFA_Clustering
 
         private void ButtonMakeClusters_Click(object sender, RoutedEventArgs e)
         {
-            CanvasMain.Children.Clear();
-
             Alghorithm.RangeX = new Point(0, CanvasMain.ActualWidth);
             Alghorithm.RangeY = new Point(0, CanvasMain.ActualHeight);
             Alghorithm.Dimension = 2;
@@ -166,9 +208,11 @@ namespace FFA_Clustering
             CanvasMain.Children.Clear();
             Draw();
 
-            TextBoxSilhouetteMethod.Text = 
-                Alghorithm.Sse(Alghorithm.Fireflies.FirstOrDefault()).
+            TextBoxSilhouetteMethod.Text =
+                Alghorithm.SilhouetteMethod(Alghorithm.Fireflies.FirstOrDefault()).
                 ToString(CultureInfo.InvariantCulture);
+            TextBoxSumOfSquaredError.Text =
+                    Alghorithm.Fireflies.First().SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
         }
 
         private void Draw()
@@ -190,18 +234,24 @@ namespace FFA_Clustering
                 });
             }
 
-            if (Alghorithm.Fireflies.Count <= 0) return;
-            for (var i = 0; i < Alghorithm.Fireflies[0].Centroids.Count; i++)
+            colors.Clear();
+            for (var i = 0; i < Alghorithm.Fireflies.Count; i++)
+                colors.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
+            for (var ffI = 0; ffI < Alghorithm.Fireflies.Count; ffI++)
             {
-                var fireflyPoint = Alghorithm.Fireflies[0].Centroids[i];
-                CanvasMain.Children.Add(new Rectangle
+                var firefly = Alghorithm.Fireflies[ffI];
+                foreach (var fireflyPoint in firefly.Centroids)
                 {
-                    Stroke = new SolidColorBrush(colors[i]),
-                    Fill = new SolidColorBrush(colors[i]),
-                    Width = 4 * HalfPointSize,
-                    Height = 4 * HalfPointSize,
-                    Margin = new Thickness(fireflyPoint.X[0] - HalfPointSize, fireflyPoint.X[1] - HalfPointSize, 0, 0)
-                });
+                    var sz = ffI == 0 ? 8*HalfPointSize : 4*HalfPointSize;
+                    CanvasMain.Children.Add(new Rectangle
+                    {
+                        Stroke = new SolidColorBrush(colors[ffI]),
+                        Fill = new SolidColorBrush(colors[ffI]),
+                        Width = sz,
+                        Height = sz,
+                        Margin = new Thickness(fireflyPoint.X[0] - HalfPointSize, fireflyPoint.X[1] - HalfPointSize, 0, 0)
+                    });
+                }
             }
         }
 
@@ -283,13 +333,37 @@ namespace FFA_Clustering
                 MenuItemOpen.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
         }
 
-        private void ButtonRun_Click(object sender, RoutedEventArgs e)
+        private async void ButtonRun_Click(object sender, RoutedEventArgs e)
         {
-            var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
-            var firefly = Alghorithm.Run(10, clustersNumber);
+            Alghorithm.RangeX = new Point(0, CanvasMain.ActualWidth);
+            Alghorithm.RangeY = new Point(0, CanvasMain.ActualHeight);
+            Alghorithm.Dimension = 2;
 
-            TextBoxSilhouetteMethod.Text = Alghorithm.SilhouetteMethod(firefly).ToString(CultureInfo.InvariantCulture);
-            Draw();
+            var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
+            Alghorithm.Itialization(10, clustersNumber);
+
+            //var firefly = Alghorithm.Run(10, clustersNumber);
+
+            for (var iter = 0; iter < Alghorithm.MaximumGenerations; iter++)
+            {
+                //await Task.Run(Alghorithm.Iteration(iter));
+                await Alghorithm.Iteration(iter);
+                TextBoxSilhouetteMethod.Text =
+                    Alghorithm.SilhouetteMethod(Alghorithm.Fireflies.First()).ToString(CultureInfo.InvariantCulture);
+                TextBoxSumOfSquaredError.Text =
+                    Alghorithm.Fireflies.First().SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+                Alghorithm.UpdatePoints(Alghorithm.Fireflies.First());
+                CanvasMain.Children.Clear();
+                Draw();
+                ProgressBarInfo.Value = (int)(iter * 100 / Alghorithm.MaximumGenerations);
+                await Task.Delay(500);
+                LabelInfo.Content = $"Iteration #{iter}";
+
+                //if (iter == 30)
+                //{
+                //    var x = 0;
+                //}
+            }
         }
     }
 }
