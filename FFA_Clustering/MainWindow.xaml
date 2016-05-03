@@ -37,10 +37,9 @@
                 <MenuItem x:Name="MenuItemOpen" Header="Open" Click="MenuItemOpen_Click"/>
             </MenuItem>
         </Menu>
-        <StatusBar Height="29" VerticalAlignment="Bottom" Background="#FF007ACC">
-            <ProgressBar x:Name="ProgressBarInfo" Height="14" Width="292" Background="#FF007ACC" BorderBrush="{x:Null}"/>
-            <Label x:Name="LabelInfo" Content="" HorizontalAlignment="Center" VerticalAlignment="Top" Width="265" VerticalContentAlignment="Center" Foreground="White"/>
-
+        <StatusBar Height="23" VerticalAlignment="Bottom" Background="#FF007ACC">
+            <Label x:Name="LabelInfo" Content="" HorizontalAlignment="Center" VerticalAlignment="Top" Width="265" VerticalContentAlignment="Center" Foreground="White" Padding="0"/>
+            <ProgressBar x:Name="ProgressBarInfo" Background="#FF007ACC" BorderBrush="{x:Null}" Height="14" Width="292"/>
         </StatusBar>
 
     </Grid>

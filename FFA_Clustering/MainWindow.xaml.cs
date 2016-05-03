@@ -38,6 +38,9 @@ namespace FFA_Clustering
     {
         private const int GroupBoxDrawPointsHeight = 190;
         private const int HalfPointSize = 2;
+        private const int IterationDelay = 125;
+
+        private bool IsRunClicked { get; set; }
 
         public bool IsInDrawPointsMode { get; set; }
         public Alghorithm Alghorithm { get; set; }
@@ -56,8 +59,8 @@ namespace FFA_Clustering
 
             Alghorithm = new Alghorithm
             {
-                RangeX = new Point(0, CanvasMain.ActualWidth),
-                RangeY = new Point(0, CanvasMain.ActualHeight),
+                RangeX = (int) CanvasMain.ActualWidth,
+                RangeY = (int) CanvasMain.ActualHeight,
                 Dimension = 2
             };
 
@@ -65,7 +68,7 @@ namespace FFA_Clustering
 
             OpenFile("C:\\Users\\Max\\Downloads\\InitialSet.json");
 
-            for (var i = 0; i < 20; i++)
+            for (var i = 0; i < 200; i++)
                 Clrs.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
         }
 
@@ -203,8 +206,8 @@ namespace FFA_Clustering
 
         private void ButtonMakeClusters_Click(object sender, RoutedEventArgs e)
         {
-            Alghorithm.RangeX = new Point(0, CanvasMain.ActualWidth);
-            Alghorithm.RangeY = new Point(0, CanvasMain.ActualHeight);
+            Alghorithm.RangeX = (int) CanvasMain.ActualWidth;
+            Alghorithm.RangeY = (int) CanvasMain.ActualHeight;
             Alghorithm.Dimension = 2;
 
             var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
@@ -224,7 +227,7 @@ namespace FFA_Clustering
         {
             foreach (var point in Alghorithm.Points)
             {
-                var pointColor = point.BelongsToCentroid != -1 ? Clrs[point.BelongsToCentroid] : Colors.Red;
+                var pointColor = !IsRunClicked && point.BelongsToCentroid != -1 ? Clrs[point.BelongsToCentroid] : Colors.Red;
                 CanvasMain.Children.Add(new Rectangle
                 {
                     Stroke = new SolidColorBrush(pointColor),
@@ -235,22 +238,24 @@ namespace FFA_Clustering
                 });
             }
 
-            //colors.Clear();
-            //for (var i = 0; i < Alghorithm.Fireflies.Count; i++)
-            //    colors.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
             for (var ffI = 0; ffI < Alghorithm.Fireflies.Count; ffI++)
             {
+                if (!IsRunClicked && ffI != 0)
+                    return;
+
                 var firefly = Alghorithm.Fireflies[ffI];
                 for (var j = 0; j < firefly.Centroids.Count; j++)
                 //foreach (var fireflyPoint in firefly.Centroids)
                 {
                     var fireflyPoint = firefly.Centroids[j];
-                    //var sz = ffI == 0 ? 8*HalfPointSize : 4*HalfPointSize;
-                    var sz = 4 * HalfPointSize;
+                    //if (IsRunClicked)
+                    var sz = IsRunClicked && ffI == 0 ? 8 * HalfPointSize : 4 * HalfPointSize;
+                    var clr = IsRunClicked ? Clrs[ffI] : Clrs[j];
+                    //var sz = 4 * HalfPointSize;
                     CanvasMain.Children.Add(new Rectangle
                     {
-                        Stroke = new SolidColorBrush(Clrs[j]),
-                        Fill = new SolidColorBrush(Clrs[j]),
+                        Stroke = new SolidColorBrush(clr),
+                        Fill = new SolidColorBrush(clr),
                         Width = sz,
                         Height = sz,
                         Margin = new Thickness(fireflyPoint.X[0] - HalfPointSize, fireflyPoint.X[1] - HalfPointSize, 0, 0)
@@ -339,12 +344,14 @@ namespace FFA_Clustering
 
         private async void ButtonRun_Click(object sender, RoutedEventArgs e)
         {
-            Alghorithm.RangeX = new Point(0, CanvasMain.ActualWidth);
-            Alghorithm.RangeY = new Point(0, CanvasMain.ActualHeight);
+            IsRunClicked = true;
+
+            Alghorithm.RangeX = (int) CanvasMain.ActualWidth;
+            Alghorithm.RangeY = (int) CanvasMain.ActualHeight;
             Alghorithm.Dimension = 2;
 
             var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
-            Alghorithm.Itialization(10, clustersNumber);
+            Alghorithm.Itialization(5, clustersNumber);
 
             //var firefly = Alghorithm.Run(10, clustersNumber);
 
@@ -354,7 +361,7 @@ namespace FFA_Clustering
                 await Alghorithm.Iteration(iter);
 
                 var ff = Alghorithm.Fireflies.First();
-                TextBoxSumOfSquaredError.Text = ff.SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+                TextBoxSumOfSquaredError.Text = $"{ff.SumOfSquaredError,-18:0.}";
                 TextBoxSilhouetteMethod.Text = $"{Alghorithm.SilhouetteMethod(ff),-18:0.0000000000}";
                 TextBoxXieBeniIndex.Text = $"{Alghorithm.XieBeniIndex(ff),-18:0.0000000000}";
 
@@ -364,22 +371,24 @@ namespace FFA_Clustering
                 //    Alghorithm.Fireflies.First().SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
                 Alghorithm.UpdatePoints(Alghorithm.Fireflies.First());
                 CanvasMain.Children.Clear();
+                if (iter == Alghorithm.MaximumGenerations - 1)
+                {
+                    IsRunClicked = false;
+                    await CanvasFlash();
+                }
                 Draw();
                 ProgressBarInfo.Value = (int)(iter * 100 / Alghorithm.MaximumGenerations);
-                await Task.Delay(500);
                 LabelInfo.Content = $"Iteration #{iter}";
-
-                //if (iter == 30)
-                //{
-                //    var x = 0;
-                //}
+                await Task.Delay(IterationDelay);
             }
         }
 
         private async void ButtonKMeans_Click(object sender, RoutedEventArgs e)
         {
-            Alghorithm.RangeX = new Point(0, CanvasMain.ActualWidth);
-            Alghorithm.RangeY = new Point(0, CanvasMain.ActualHeight);
+            IsRunClicked = false;
+
+            Alghorithm.RangeX = (int) CanvasMain.ActualWidth;
+            Alghorithm.RangeY = (int) CanvasMain.ActualHeight;
             Alghorithm.Dimension = 2;
 
             var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
@@ -390,38 +399,43 @@ namespace FFA_Clustering
                 await Alghorithm.IterationKMeans();
 
                 var ff = Alghorithm.Fireflies.First();
-                TextBoxSumOfSquaredError.Text = ff.SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+                TextBoxSumOfSquaredError.Text = $"{ff.SumOfSquaredError,-18:0.}";
                 TextBoxSilhouetteMethod.Text = $"{Alghorithm.SilhouetteMethod(ff),-18:0.0000000000}";
                 TextBoxXieBeniIndex.Text = $"{Alghorithm.XieBeniIndex(ff),-18:0.0000000000}";
                 Alghorithm.UpdatePoints(ff);
                 CanvasMain.Children.Clear();
                 Draw();
-                await Task.Delay(500);
                 LabelInfo.Content = $"Iteration #{iter}";
+                await Task.Delay(IterationDelay);
 
                 if (!Alghorithm.KMeansCanStop) continue;
-
                 LabelInfo.Content = "K-means finished";
-                const int animationWait = 150;
-                var prevColor = new SolidColorBrush(((SolidColorBrush)CanvasMain.Background).Color).Color;
-                var cb = CanvasMain.Background;
-                var da = new ColorAnimation
-                {
-                    From = prevColor,
-                    To = Colors.LawnGreen,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
-                };
-                cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
-                await Task.Delay(animationWait);
-                var da1 = new ColorAnimation
-                {
-                    From = Colors.LawnGreen,
-                    To = prevColor,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
-                };
-                cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
+                await CanvasFlash();
+                
                 return;
             }
+        }
+
+        private async Task CanvasFlash()
+        {
+            const int animationWait = 150;
+            var prevColor = new SolidColorBrush(((SolidColorBrush)CanvasMain.Background).Color).Color;
+            var cb = CanvasMain.Background;
+            var da = new ColorAnimation
+            {
+                From = prevColor,
+                To = Colors.LawnGreen,
+                Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+            };
+            cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
+            await Task.Delay(animationWait);
+            var da1 = new ColorAnimation
+            {
+                From = Colors.LawnGreen,
+                To = prevColor,
+                Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+            };
+            cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
         }
     }
 }

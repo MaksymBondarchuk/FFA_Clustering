@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace FFA_Clustering
 {
@@ -15,8 +14,8 @@ namespace FFA_Clustering
 
         private Random Rand { get; } = new Random();
 
-        public Point RangeX { get; set; }
-        public Point RangeY { get; set; }
+        public int RangeX { get; set; }
+        public int RangeY { get; set; }
 
         public int Dimension { get; set; } = 2;
 
@@ -34,8 +33,8 @@ namespace FFA_Clustering
                 for (var i = 0; i < clustersNumber; i++)
                 {
                     var point = new ClusterPoint { IsCentroid = true };
-                    point.X.Add(Rand.Next((int)RangeX.X, (int)RangeX.Y));
-                    point.X.Add(Rand.Next((int)RangeY.X, (int)RangeY.Y));
+                    point.X.Add(Rand.Next(RangeX));
+                    point.X.Add(Rand.Next(RangeY));
                     firefly.Centroids.Add(point);
                     firefly.CentroidPoints.Add(new List<int>());
                 }
@@ -109,6 +108,9 @@ namespace FFA_Clustering
 
         public double SumOfSquaredError(Firefly firefly)
         {
+            foreach (var t in firefly.CentroidPoints)
+                t.Clear();
+
             var sse = 0.0;
             for (var pIndex = 0; pIndex < Points.Count; pIndex++)
             {
@@ -144,14 +146,14 @@ namespace FFA_Clustering
 
             for (var i = 0; i < Fireflies.Count; i++)
             {
+                var lambdaI = .5 - i * (.5 - 1.9) / (Fireflies.Count - 1);
                 for (var j = 0; j < Fireflies.Count; j++)
                 {
-                    if (i == j || Fireflies[i].SumOfSquaredError < Fireflies[j].SumOfSquaredError)
+                    if (i == j || Fireflies[i].SumOfSquaredError <= Fireflies[j].SumOfSquaredError)
                         continue;
 
-                    var lambdaI = .5 - i * (.5 - 1.9) / (Fireflies.Count - 1);
                     MoveTowards(Fireflies[i], Fireflies[j], alphaT, lambdaI);
-                    Fireflies[i].SumOfSquaredError = SumOfSquaredError(Fireflies[i]);
+                    //Fireflies[i].SumOfSquaredError = SumOfSquaredError(Fireflies[i]);
                 }
             }
 
@@ -207,18 +209,16 @@ namespace FFA_Clustering
                 {
                     var randomPart = alpha * (Rand.NextDouble() - .5) * MantegnaRandom(lambda);
                     firefly.Centroids[i].X[h] += brightness * (fireflyTo.Centroids[i].X[h] - firefly.Centroids[i].X[h]) + randomPart;
-                }
 
-                if (firefly.Centroids[i].X[0] < RangeX.X)
-                    firefly.Centroids[i].X[0] = RangeX.X;
-                else
-                if (firefly.Centroids[i].X[0] > RangeX.Y)
-                    firefly.Centroids[i].X[0] = RangeX.Y;
-                if (firefly.Centroids[i].X[1] < RangeY.X)
-                    firefly.Centroids[i].X[1] = RangeY.X;
-                else
-                if (firefly.Centroids[i].X[1] > RangeY.Y)
-                    firefly.Centroids[i].X[1] = RangeY.Y;
+                    if (firefly.Centroids[i].X[h] < 0 || RangeX < firefly.Centroids[i].X[h] ||
+                        double.IsNaN(firefly.Centroids[i].X[h]))
+                        firefly.Centroids[i].X[h] = Rand.Next(RangeX);
+
+                    //if (double.IsNaN(firefly.Centroids[i].X[h]))
+                    //{
+                    //    var x = 0;
+                    //}
+                }
 
                 firefly.SumOfSquaredError = SumOfSquaredError(firefly);
             }
@@ -257,6 +257,7 @@ namespace FFA_Clustering
 
         public void ItializationKMeans(int clustersNumber)
         {
+            KMeansCanStop = false;
             Fireflies.Clear();
             AddRandomFireflies(1, clustersNumber);
             FillCentroidPoints(Fireflies.First());
@@ -307,7 +308,8 @@ namespace FFA_Clustering
             var minDist = double.MaxValue;
             for (var i = 0; i < firefly.Centroids.Count; i++)
                 minDist = firefly.Centroids.Where((t, j) => i != j).Select(t => firefly.Centroids[i].Dist2To(t)).Concat(new[] {minDist}).Min();
-            return sum / Points.Count / minDist;
+            var res = sum/Points.Count/minDist;
+            return double.IsNaN(res) ? -1 : res;
         }
     }
 }
