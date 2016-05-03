@@ -56,7 +56,7 @@ namespace FFA_Clustering
                 var indexOfMinCentroid = -1;
                 for (var i = 0; i < firefly.Centroids.Count; i++)
                 {
-                    var r2 = point.DistTo(firefly.Centroids[i]);
+                    var r2 = point.Dist2To(firefly.Centroids[i]);
                     if (distMin < r2) continue;
                     distMin = r2;
                     indexOfMinCentroid = i;
@@ -87,20 +87,18 @@ namespace FFA_Clustering
             if (firefly == null)
                 return double.MinValue;
 
-            //UpdatePoints(firefly);
-
             var s = 0.0;
             for (var i = 0; i < firefly.Centroids.Count; i++)
             {
                 foreach (var cpI in firefly.CentroidPoints[i])
                 {
-                    var a = firefly.CentroidPoints[i].Where(cpJ => cpI != cpJ).Sum(cpJ => Points[cpI].DistTo(Points[cpJ]));
+                    var a = firefly.CentroidPoints[i].Where(cpJ => cpI != cpJ).Sum(cpJ => Math.Sqrt(Points[cpI].Dist2To(Points[cpJ])));
 
                     var b = 0.0;
                     for (var j = 0; j < firefly.Centroids.Count; j++)
                     {
                         if (i == j) continue;
-                        b += firefly.CentroidPoints[j].Sum(cpJ => Points[cpI].DistTo(Points[cpJ]));
+                        b += firefly.CentroidPoints[j].Sum(cpJ => Math.Sqrt(Points[cpI].Dist2To(Points[cpJ])));
                     }
 
                     s += (b - a) / Math.Max(a, b);
@@ -288,7 +286,7 @@ namespace FFA_Clustering
                 for (var h = 0; h < newPoint.X.Count; h++)
                     newPoint.X[h] /= cp.Count;
 
-                if (firefly.Centroids[i].DistTo(newPoint) < 1e-4)
+                if (firefly.Centroids[i].Dist2To(newPoint) < 1e-4)
                     finalPointsNumber++;
                 firefly.Centroids[i] = newPoint;
             }
@@ -300,6 +298,16 @@ namespace FFA_Clustering
                 KMeansCanStop = true;
 
             await Task.Delay(0);
+        }
+
+        public double XieBeniIndex(Firefly firefly)
+        {
+            var sum = firefly.Centroids.Select((t, i) => firefly.CentroidPoints[i].Sum(pIdx => Points[pIdx].Dist2To(t))/firefly.CentroidPoints[i].Count).Sum();
+
+            var minDist = double.MaxValue;
+            for (var i = 0; i < firefly.Centroids.Count; i++)
+                minDist = firefly.Centroids.Where((t, j) => i != j).Select(t => firefly.Centroids[i].Dist2To(t)).Concat(new[] {minDist}).Min();
+            return sum / Points.Count / minDist;
         }
     }
 }

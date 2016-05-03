@@ -17,7 +17,7 @@ namespace FFA_Clustering
         /// </summary>
         public int BelongsToCentroid { get; set; } = -1;
 
-        public double DistTo(ClusterPoint cp)
+        public double Dist2To(ClusterPoint cp)
         {
             return X.Select((t, i) => (t - cp.X[i])*(t - cp.X[i])).Sum();
         }

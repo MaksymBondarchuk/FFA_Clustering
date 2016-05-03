@@ -18,16 +18,18 @@
                 <RadioButton x:Name="RadioButtonDispersionAsSquare" Content="Dispersion as square" HorizontalAlignment="Left" Margin="10,129,0,0" VerticalAlignment="Top" Foreground="White" Background="White" BorderBrush="{x:Null}"/>
             </Grid>
         </GroupBox>
-        <Grid x:Name="BottomGrid" HorizontalAlignment="Left" Height="330" Margin="0,255,0,0" VerticalAlignment="Top" Width="190">
+        <Grid x:Name="BottomGrid" HorizontalAlignment="Left" Height="400" Margin="0,255,0,0" VerticalAlignment="Top" Width="190">
             <Button x:Name="ButtonClear" Content="Clear" HorizontalAlignment="Left" Margin="10,0,0,0" Width="110" Height="20" VerticalAlignment="Top" Click="ButtonClear_Click" BorderBrush="#FF3F3F46" Background="#FF333337" Foreground="White"/>
             <Button x:Name="ButtonMakeClusters" Content="Make clusters" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Width="110" Click="ButtonMakeClusters_Click" BorderBrush="#FF3F3F46" Background="#FF333337" Foreground="White"/>
             <TextBox x:Name="TextBoxClustersNumber" HorizontalAlignment="Left" Height="23" Margin="10,50,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt" Background="#FF333337" Foreground="White" BorderBrush="{x:Null}"/>
-            <TextBox x:Name="TextBoxSilhouetteMethod" HorizontalAlignment="Left" Height="23" Margin="10,125,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="110" Background="#FF333337" BorderBrush="{x:Null}" Foreground="White"/>
-            <Button x:Name="ButtonRun" Content="Run" HorizontalAlignment="Left" Margin="10,207,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRun_Click" BorderBrush="#FF3F3F46" Background="#FF333337" Foreground="White"/>
-            <Label x:Name="LabelSilhouetteMethod" Content="Silhouette Method" HorizontalAlignment="Left" Margin="10,99,0,0" VerticalAlignment="Top" Foreground="White"/>
-            <TextBox x:Name="TextBoxSumOfSquaredError" HorizontalAlignment="Left" Height="23" Margin="11,179,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109" Foreground="White" Background="#FF333337" BorderBrush="{x:Null}"/>
-            <Label x:Name="LabelSumOfSquaredError" Content="Sum of Squared Error" HorizontalAlignment="Left" Margin="11,153,0,0" VerticalAlignment="Top" Foreground="White"/>
-            <Button x:Name="ButtonKMeans" Content="K-means" HorizontalAlignment="Left" Margin="10,232,0,0" VerticalAlignment="Top" Width="110" BorderBrush="#FF3F3F46" Background="#FF333337" Foreground="White" Click="ButtonKMeans_Click"/>
+            <TextBox x:Name="TextBoxSilhouetteMethod" HorizontalAlignment="Left" Height="23" Margin="11,179,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="110" Background="#FF333337" BorderBrush="{x:Null}" Foreground="White"/>
+            <Button x:Name="ButtonRun" Content="Run" HorizontalAlignment="Left" Margin="10,285,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRun_Click" BorderBrush="#FF3F3F46" Background="#FF333337" Foreground="White"/>
+            <Label x:Name="LabelSilhouetteMethod" Content="Silhouette Method" HorizontalAlignment="Left" Margin="11,153,0,0" VerticalAlignment="Top" Foreground="White"/>
+            <TextBox x:Name="TextBoxSumOfSquaredError" HorizontalAlignment="Left" Height="23" Margin="10,125,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109" Foreground="White" Background="#FF333337" BorderBrush="{x:Null}"/>
+            <Label x:Name="LabelSumOfSquaredError" Content="Sum of Squared Error" HorizontalAlignment="Left" Margin="10,99,0,0" VerticalAlignment="Top" Foreground="White"/>
+            <Button x:Name="ButtonKMeans" Content="K-means" HorizontalAlignment="Left" Margin="10,310,0,0" VerticalAlignment="Top" Width="110" BorderBrush="#FF3F3F46" Background="#FF333337" Foreground="White" Click="ButtonKMeans_Click"/>
+            <TextBox x:Name="TextBoxXieBeniIndex" HorizontalAlignment="Left" Height="23" Margin="10,233,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109" Foreground="White" Background="#FF333337" BorderBrush="{x:Null}"/>
+            <Label x:Name="LabelXieBeniIndex" Content="Xie-Beni index" HorizontalAlignment="Left" Margin="10,207,0,0" VerticalAlignment="Top" Foreground="White"/>
         </Grid>
         <Menu Height="20" VerticalAlignment="Top" Background="#FF2D2D30">
             <MenuItem Header="File" Foreground="White">

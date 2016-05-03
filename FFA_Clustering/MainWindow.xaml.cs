@@ -106,7 +106,7 @@ namespace FFA_Clustering
                 if (Shit == 1)
                 {
                     var firefly = new Firefly();
-                    var point = new ClusterPoint {IsCentroid = true};
+                    var point = new ClusterPoint { IsCentroid = true };
                     point.X.Add(p.X);
                     point.X.Add(p.Y);
                     firefly.Centroids.Add(point);
@@ -117,7 +117,7 @@ namespace FFA_Clustering
 
                 var ff = Alghorithm.Fireflies.First();
 
-                var pnt = new ClusterPoint {IsCentroid = true};
+                var pnt = new ClusterPoint { IsCentroid = true };
                 pnt.X.Add(p.X);
                 pnt.X.Add(p.Y);
                 ff.Centroids.Add(pnt);
@@ -352,10 +352,16 @@ namespace FFA_Clustering
             {
                 //await Task.Run(Alghorithm.Iteration(iter));
                 await Alghorithm.Iteration(iter);
-                TextBoxSilhouetteMethod.Text =
-                    Alghorithm.SilhouetteMethod(Alghorithm.Fireflies.First()).ToString(CultureInfo.InvariantCulture);
-                TextBoxSumOfSquaredError.Text =
-                    Alghorithm.Fireflies.First().SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+
+                var ff = Alghorithm.Fireflies.First();
+                TextBoxSumOfSquaredError.Text = ff.SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+                TextBoxSilhouetteMethod.Text = $"{Alghorithm.SilhouetteMethod(ff),-18:0.0000000000}";
+                TextBoxXieBeniIndex.Text = $"{Alghorithm.XieBeniIndex(ff),-18:0.0000000000}";
+
+                //TextBoxSilhouetteMethod.Text =
+                //    Alghorithm.SilhouetteMethod(Alghorithm.Fireflies.First()).ToString(CultureInfo.InvariantCulture);
+                //TextBoxSumOfSquaredError.Text =
+                //    Alghorithm.Fireflies.First().SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
                 Alghorithm.UpdatePoints(Alghorithm.Fireflies.First());
                 CanvasMain.Children.Clear();
                 Draw();
@@ -384,10 +390,9 @@ namespace FFA_Clustering
                 await Alghorithm.IterationKMeans();
 
                 var ff = Alghorithm.Fireflies.First();
-                TextBoxSilhouetteMethod.Text =
-                    Alghorithm.SilhouetteMethod(ff).ToString(CultureInfo.InvariantCulture);
-                TextBoxSumOfSquaredError.Text =
-                    ff.SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+                TextBoxSumOfSquaredError.Text = ff.SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+                TextBoxSilhouetteMethod.Text = $"{Alghorithm.SilhouetteMethod(ff),-18:0.0000000000}";
+                TextBoxXieBeniIndex.Text = $"{Alghorithm.XieBeniIndex(ff),-18:0.0000000000}";
                 Alghorithm.UpdatePoints(ff);
                 CanvasMain.Children.Clear();
                 Draw();
@@ -395,7 +400,26 @@ namespace FFA_Clustering
                 LabelInfo.Content = $"Iteration #{iter}";
 
                 if (!Alghorithm.KMeansCanStop) continue;
+
                 LabelInfo.Content = "K-means finished";
+                const int animationWait = 150;
+                var prevColor = new SolidColorBrush(((SolidColorBrush)CanvasMain.Background).Color).Color;
+                var cb = CanvasMain.Background;
+                var da = new ColorAnimation
+                {
+                    From = prevColor,
+                    To = Colors.LawnGreen,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+                };
+                cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
+                await Task.Delay(animationWait);
+                var da1 = new ColorAnimation
+                {
+                    From = Colors.LawnGreen,
+                    To = prevColor,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+                };
+                cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
                 return;
             }
         }
