@@ -43,8 +43,10 @@ namespace FFA_Clustering
         public Alghorithm Alghorithm { get; set; }
         public Random Rand { get; } = new Random();
 
-        private int Shit { get; set; } = 0;
+        private int Shit { get; set; }
         //private bool IsMenuItemSaveEnabled = false;
+
+        private List<Color> Clrs { get; } = new List<Color>();
 
         public MainWindow()
         {
@@ -62,6 +64,9 @@ namespace FFA_Clustering
             Application.Current.Resources["IsMenuItemSaveEnabled"] = false;
 
             OpenFile("C:\\Users\\Max\\Downloads\\InitialSet.json");
+
+            for (var i = 0; i < 20; i++)
+                Clrs.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
         }
 
         private void CheckTextForInt(object sender, TextCompositionEventArgs e)
@@ -217,13 +222,9 @@ namespace FFA_Clustering
 
         private void Draw()
         {
-            var colors = new List<Color>();
-            for (var i = 0; i < Convert.ToInt32(TextBoxClustersNumber.Text); i++)
-                colors.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
-
             foreach (var point in Alghorithm.Points)
             {
-                var pointColor = point.BelongsToCentroid != -1 ? colors[point.BelongsToCentroid] : Colors.Red;
+                var pointColor = point.BelongsToCentroid != -1 ? Clrs[point.BelongsToCentroid] : Colors.Red;
                 CanvasMain.Children.Add(new Rectangle
                 {
                     Stroke = new SolidColorBrush(pointColor),
@@ -234,19 +235,22 @@ namespace FFA_Clustering
                 });
             }
 
-            colors.Clear();
-            for (var i = 0; i < Alghorithm.Fireflies.Count; i++)
-                colors.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
+            //colors.Clear();
+            //for (var i = 0; i < Alghorithm.Fireflies.Count; i++)
+            //    colors.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
             for (var ffI = 0; ffI < Alghorithm.Fireflies.Count; ffI++)
             {
                 var firefly = Alghorithm.Fireflies[ffI];
-                foreach (var fireflyPoint in firefly.Centroids)
+                for (var j = 0; j < firefly.Centroids.Count; j++)
+                //foreach (var fireflyPoint in firefly.Centroids)
                 {
-                    var sz = ffI == 0 ? 8*HalfPointSize : 4*HalfPointSize;
+                    var fireflyPoint = firefly.Centroids[j];
+                    //var sz = ffI == 0 ? 8*HalfPointSize : 4*HalfPointSize;
+                    var sz = 4 * HalfPointSize;
                     CanvasMain.Children.Add(new Rectangle
                     {
-                        Stroke = new SolidColorBrush(colors[ffI]),
-                        Fill = new SolidColorBrush(colors[ffI]),
+                        Stroke = new SolidColorBrush(Clrs[j]),
+                        Fill = new SolidColorBrush(Clrs[j]),
                         Width = sz,
                         Height = sz,
                         Margin = new Thickness(fireflyPoint.X[0] - HalfPointSize, fireflyPoint.X[1] - HalfPointSize, 0, 0)
@@ -363,6 +367,36 @@ namespace FFA_Clustering
                 //{
                 //    var x = 0;
                 //}
+            }
+        }
+
+        private async void ButtonKMeans_Click(object sender, RoutedEventArgs e)
+        {
+            Alghorithm.RangeX = new Point(0, CanvasMain.ActualWidth);
+            Alghorithm.RangeY = new Point(0, CanvasMain.ActualHeight);
+            Alghorithm.Dimension = 2;
+
+            var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
+            Alghorithm.ItializationKMeans(clustersNumber);
+
+            for (var iter = 0; iter < Alghorithm.MaximumGenerations; iter++)
+            {
+                await Alghorithm.IterationKMeans();
+
+                var ff = Alghorithm.Fireflies.First();
+                TextBoxSilhouetteMethod.Text =
+                    Alghorithm.SilhouetteMethod(ff).ToString(CultureInfo.InvariantCulture);
+                TextBoxSumOfSquaredError.Text =
+                    ff.SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+                Alghorithm.UpdatePoints(ff);
+                CanvasMain.Children.Clear();
+                Draw();
+                await Task.Delay(500);
+                LabelInfo.Content = $"Iteration #{iter}";
+
+                if (!Alghorithm.KMeansCanStop) continue;
+                LabelInfo.Content = "K-means finished";
+                return;
             }
         }
     }
