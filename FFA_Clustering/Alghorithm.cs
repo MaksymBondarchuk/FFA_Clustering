@@ -213,11 +213,6 @@ namespace FFA_Clustering
                     if (firefly.Centroids[i].X[h] < 0 || RangeX < firefly.Centroids[i].X[h] ||
                         double.IsNaN(firefly.Centroids[i].X[h]))
                         firefly.Centroids[i].X[h] = Rand.Next(RangeX);
-
-                    //if (double.IsNaN(firefly.Centroids[i].X[h]))
-                    //{
-                    //    var x = 0;
-                    //}
                 }
 
                 firefly.SumOfSquaredError = SumOfSquaredError(firefly);

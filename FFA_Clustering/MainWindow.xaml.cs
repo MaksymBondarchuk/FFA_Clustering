@@ -4,14 +4,14 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
-using System.Web.Script.Serialization;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using Microsoft.Win32;
 
 // For button click functions call
@@ -45,9 +45,6 @@ namespace FFA_Clustering
         public bool IsInDrawPointsMode { get; set; }
         public Alghorithm Alghorithm { get; set; }
         public Random Rand { get; } = new Random();
-
-        private int Shit { get; set; }
-        //private bool IsMenuItemSaveEnabled = false;
 
         private List<Color> Clrs { get; } = new List<Color>();
 
@@ -99,47 +96,6 @@ namespace FFA_Clustering
 
         private void CanvasMain_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (!IsInDrawPointsMode)
-            {
-                var p = Mouse.GetPosition(CanvasMain);
-                Shit++;
-                if (Shit > 5)
-                    return;
-
-                if (Shit == 1)
-                {
-                    var firefly = new Firefly();
-                    var point = new ClusterPoint { IsCentroid = true };
-                    point.X.Add(p.X);
-                    point.X.Add(p.Y);
-                    firefly.Centroids.Add(point);
-                    firefly.CentroidPoints.Add(new List<int>());
-                    Alghorithm.Fireflies.Add(firefly);
-                    return;
-                }
-
-                var ff = Alghorithm.Fireflies.First();
-
-                var pnt = new ClusterPoint { IsCentroid = true };
-                pnt.X.Add(p.X);
-                pnt.X.Add(p.Y);
-                ff.Centroids.Add(pnt);
-                ff.CentroidPoints.Add(new List<int>());
-
-                if (Shit == 5)
-                {
-                    ff.SumOfSquaredError = Alghorithm.SumOfSquaredError(ff);
-                    CanvasMain.Children.Clear();
-                    Draw();
-
-                    TextBoxSilhouetteMethod.Text =
-                        Alghorithm.SilhouetteMethod(Alghorithm.Fireflies.FirstOrDefault()).
-                            ToString(CultureInfo.InvariantCulture);
-                    TextBoxSumOfSquaredError.Text =
-                        Alghorithm.Fireflies.First().SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
-                }
-            }
-
             if (!IsInDrawPointsMode ||
                 TextBoxDispersion.Text.Equals(string.Empty) ||
                 TextBoxPointsPerClick.Text.Equals(string.Empty))
@@ -204,25 +160,6 @@ namespace FFA_Clustering
                 BottomGrid.Margin.Right, BottomGrid.Margin.Bottom);
         }
 
-        private void ButtonMakeClusters_Click(object sender, RoutedEventArgs e)
-        {
-            Alghorithm.RangeX = (int) CanvasMain.ActualWidth;
-            Alghorithm.RangeY = (int) CanvasMain.ActualHeight;
-            Alghorithm.Dimension = 2;
-
-            var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
-            Alghorithm.Test(clustersNumber);
-
-            CanvasMain.Children.Clear();
-            Draw();
-
-            TextBoxSilhouetteMethod.Text =
-                Alghorithm.SilhouetteMethod(Alghorithm.Fireflies.FirstOrDefault()).
-                ToString(CultureInfo.InvariantCulture);
-            TextBoxSumOfSquaredError.Text =
-                    Alghorithm.Fireflies.First().SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
-        }
-
         private void Draw()
         {
             foreach (var point in Alghorithm.Points)
@@ -266,7 +203,7 @@ namespace FFA_Clustering
 
         private void MenuItemSave_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new SaveFileDialog()
+            var dlg = new SaveFileDialog
             {
                 DefaultExt = ".json",
                 Filter = "JavaScript Object Notation File (.json)|*.json"
@@ -297,7 +234,7 @@ namespace FFA_Clustering
 
         private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new OpenFileDialog()
+            var dlg = new OpenFileDialog
             {
                 DefaultExt = ".json",
                 Filter = "JavaScript Object Notation File (.json)|*.json"
@@ -353,11 +290,8 @@ namespace FFA_Clustering
             var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
             Alghorithm.Itialization(5, clustersNumber);
 
-            //var firefly = Alghorithm.Run(10, clustersNumber);
-
             for (var iter = 0; iter < Alghorithm.MaximumGenerations; iter++)
             {
-                //await Task.Run(Alghorithm.Iteration(iter));
                 await Alghorithm.Iteration(iter);
 
                 var ff = Alghorithm.Fireflies.First();
@@ -365,10 +299,6 @@ namespace FFA_Clustering
                 TextBoxSilhouetteMethod.Text = $"{Alghorithm.SilhouetteMethod(ff),-18:0.0000000000}";
                 TextBoxXieBeniIndex.Text = $"{Alghorithm.XieBeniIndex(ff),-18:0.0000000000}";
 
-                //TextBoxSilhouetteMethod.Text =
-                //    Alghorithm.SilhouetteMethod(Alghorithm.Fireflies.First()).ToString(CultureInfo.InvariantCulture);
-                //TextBoxSumOfSquaredError.Text =
-                //    Alghorithm.Fireflies.First().SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
                 Alghorithm.UpdatePoints(Alghorithm.Fireflies.First());
                 CanvasMain.Children.Clear();
                 if (iter == Alghorithm.MaximumGenerations - 1)
@@ -377,7 +307,7 @@ namespace FFA_Clustering
                     await CanvasFlash();
                 }
                 Draw();
-                ProgressBarInfo.Value = (int)(iter * 100 / Alghorithm.MaximumGenerations);
+                ProgressBarInfo.Value = iter * 100 /(double) Alghorithm.MaximumGenerations;
                 LabelInfo.Content = $"Iteration #{iter}";
                 await Task.Delay(IterationDelay);
             }
