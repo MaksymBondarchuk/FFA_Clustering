@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -42,9 +41,9 @@ namespace FFA_Clustering
 
         private bool IsRunClicked { get; set; }
 
-        public bool IsInDrawPointsMode { get; set; }
-        public Alghorithm Alghorithm { get; set; }
-        public Random Rand { get; } = new Random();
+        private bool IsInDrawPointsMode { get; set; }
+        private Alghorithm Alghorithm { get; }
+        private Random Rand { get; } = new Random();
 
         private List<Color> Clrs { get; } = new List<Color>();
 
@@ -288,7 +287,7 @@ namespace FFA_Clustering
             Alghorithm.Dimension = 2;
 
             var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
-            Alghorithm.Itialization(5, clustersNumber);
+            Alghorithm.Itialization(Convert.ToInt32(TextBoxFirefliesNumber.Text), clustersNumber);
 
             for (var iter = 0; iter < Alghorithm.MaximumGenerations; iter++)
             {
@@ -301,7 +300,8 @@ namespace FFA_Clustering
 
                 Alghorithm.UpdatePoints(Alghorithm.Fireflies.First());
                 CanvasMain.Children.Clear();
-                if (iter == Alghorithm.MaximumGenerations - 1)
+                if (iter == Alghorithm.MaximumGenerations - 1 ||
+                    Alghorithm.MfaFinished)
                 {
                     IsRunClicked = false;
                     await CanvasFlash();
@@ -351,21 +351,28 @@ namespace FFA_Clustering
             const int animationWait = 150;
             var prevColor = new SolidColorBrush(((SolidColorBrush)CanvasMain.Background).Color).Color;
             var cb = CanvasMain.Background;
-            var da = new ColorAnimation
+            var convertFromString = ColorConverter.ConvertFromString("#FF007ACC");
+            if (convertFromString != null)
             {
-                From = prevColor,
-                To = Colors.LawnGreen,
-                Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
-            };
-            cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
+                var da = new ColorAnimation
+                {
+                    From = prevColor,
+                    To = (Color)convertFromString,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+                };
+                cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
+            }
             await Task.Delay(animationWait);
-            var da1 = new ColorAnimation
+            if (convertFromString != null)
             {
-                From = Colors.LawnGreen,
-                To = prevColor,
-                Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
-            };
-            cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
+                var da1 = new ColorAnimation
+                {
+                    From = (Color)convertFromString,
+                    To = prevColor,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+                };
+                cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
+            }
         }
     }
 }

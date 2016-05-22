@@ -7,15 +7,14 @@ namespace FFA_Clustering
 {
     public class Alghorithm
     {
-        //public double SilhouetteMethod { get; set; }
         public const int MaximumGenerations = 100;
 
         private double Delta { get; set; }
 
         private Random Rand { get; } = new Random();
 
-        public int RangeX { get; set; }
-        public int RangeY { get; set; }
+        public int RangeX { private get; set; }
+        public int RangeY { private get; set; }
 
         public int Dimension { get; set; } = 2;
 
@@ -23,7 +22,9 @@ namespace FFA_Clustering
 
         public List<Firefly> Fireflies { get; set; } = new List<Firefly>();
 
-        public bool KMeansCanStop { get; set; }
+        public bool KMeansCanStop { get; private set; }
+
+        public bool MfaFinished { get; set; }
 
         private void AddRandomFireflies(int firefliesNumber, int clustersNumber)
         {
@@ -43,7 +44,7 @@ namespace FFA_Clustering
             }
         }
 
-        public void FillCentroidPoints(Firefly firefly)
+        private void FillCentroidPoints(Firefly firefly)
         {
             foreach (var cp in firefly.CentroidPoints)
                 cp.Clear();
@@ -62,16 +63,6 @@ namespace FFA_Clustering
                 }
                 firefly.CentroidPoints[indexOfMinCentroid].Add(pIndex);
             }
-        }
-
-        public void Test(int clustersNumber)
-        {
-            Fireflies.Clear();
-
-            AddRandomFireflies(1, clustersNumber);
-
-            FillCentroidPoints(Fireflies.First());
-            UpdatePoints(Fireflies.First());
         }
 
         public void UpdatePoints(Firefly firefly)
@@ -106,7 +97,7 @@ namespace FFA_Clustering
             return s / Points.Count;
         }
 
-        public double SumOfSquaredError(Firefly firefly)
+        private double SumOfSquaredError(Firefly firefly)
         {
             foreach (var t in firefly.CentroidPoints)
                 t.Clear();
@@ -142,6 +133,8 @@ namespace FFA_Clustering
 
         public async Task Iteration(int number)
         {
+            MfaFinished = true;
+
             var alphaT = 1e-3 * Math.Pow(Delta, number);
 
             for (var i = 0; i < Fireflies.Count; i++)
@@ -153,6 +146,7 @@ namespace FFA_Clustering
                         continue;
 
                     MoveTowards(Fireflies[i], Fireflies[j], alphaT, lambdaI);
+                    MfaFinished = false;
                     //Fireflies[i].SumOfSquaredError = SumOfSquaredError(Fireflies[i]);
                 }
             }
@@ -161,43 +155,12 @@ namespace FFA_Clustering
             await Task.Delay(0);
         }
 
-        public Firefly Run(int firefliesNumber, int clustersNumber)
-        {
-            //AddRandomFireflies(firefliesNumber, clustersNumber);
-            ////const int maximumGenerations = 1;
-            //var delta = Math.Pow(1e-4 / 1.09, 1.0 / MaximumGenerations);
-
-            //RankSwarm();
-
-            //for (long iter = 0; iter < MaximumGenerations; iter++)
-            //{
-            //    var alphaT = 1e-3 * Math.Pow(delta, iter);
-
-            //    for (var i = 0; i < Fireflies.Count; i++)
-            //    {
-            //        for (var j = 0; j < Fireflies.Count; j++)
-            //        {
-            //            if (i == j || Fireflies[i].SumOfSquaredError < Fireflies[j].SumOfSquaredError)
-            //                continue;
-
-            //            var lambdaI = .5 - i * (.5 - 1.9) / (Fireflies.Count - 1);
-            //            Fireflies[i].MoveTowards(Fireflies[j], alphaT, lambdaI);
-            //            Fireflies[i].SumOfSquaredError = SumOfSquaredError(Fireflies[i]);
-            //        }
-            //    }
-
-            //    RankSwarm();
-            //}
-
-            return Fireflies.FirstOrDefault();
-        }
-
         private void RankSwarm()
         {
             Fireflies.Sort((f1, f2) => f1.SumOfSquaredError.CompareTo(f2.SumOfSquaredError));
         }
 
-        public void MoveTowards(Firefly firefly, Firefly fireflyTo, double alpha, double lambda)
+        private void MoveTowards(Firefly firefly, Firefly fireflyTo, double alpha, double lambda)
         {
             for (var i = 0; i < firefly.Centroids.Count; i++)
             {

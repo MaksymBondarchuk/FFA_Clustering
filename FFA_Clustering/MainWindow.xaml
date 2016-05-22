@@ -4,40 +4,47 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="FFA Clustering" Height="350" Width="525" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" WindowState="Maximized" PreviewKeyDown="Window_PreviewKeyDown" Background="#FF252526">
+        Title="FFA Clustering" Height="714" Width="1280" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" WindowState="Maximized" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
 
     </Window.Resources>
 
-    <Grid>
-        <Canvas x:Name="CanvasMain" Margin="190,35,10,34" Background="#FF1E1E1E" MouseUp="CanvasMain_MouseUp"/>
-        <Button x:Name="ButtonDrawPoints" Content="Draw points" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="110" Click="ButtonDrawPoints_Click" IsDefault="True" BorderBrush="#FF3F3F46" Background="#FF333337" Foreground="White"/>
-        <GroupBox x:Name="GroupBoxDrawPoints" Header="Draw points properties" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Height="190" Width="175" BorderThickness="2" SizeChanged="GroupBoxDrawPoints_SizeChanged" Foreground="White" BorderBrush="{x:Null}">
+    <Grid Background="White">
+        <Canvas x:Name="CanvasMain" Margin="205,35,10,34" MouseUp="CanvasMain_MouseUp" Background="#00000000"/>
+        <Button x:Name="ButtonDrawPoints" Content="Draw points" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="110" Click="ButtonDrawPoints_Click" IsDefault="True"/>
+        <GroupBox x:Name="GroupBoxDrawPoints" Header="Draw points properties" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Height="190" Width="175" BorderThickness="2" SizeChanged="GroupBoxDrawPoints_SizeChanged">
             <Grid Margin="0,10,-2,3">
                 <TextBox x:Name="TextBoxPointsPerClick" HorizontalAlignment="Left" Height="23" Margin="10,27,0,0" TextWrapping="Wrap" Text="50" VerticalAlignment="Top" Width="90" PreviewTextInput="CheckTextForInt"/>
                 <TextBox x:Name="TextBoxDispersion" HorizontalAlignment="Left" Height="23" Margin="10,81,0,0" TextWrapping="Wrap" Text="200" VerticalAlignment="Top" Width="90" PreviewTextInput="CheckTextForInt"/>
-                <Label Content="Points per click" HorizontalAlignment="Left" Margin="10,1,0,0" VerticalAlignment="Top" Width="90" Foreground="White"/>
-                <Label Content="Dispersion" HorizontalAlignment="Left" Margin="10,55,0,0" VerticalAlignment="Top" Width="90" Foreground="White"/>
-                <RadioButton Content="Dispersion as circle" HorizontalAlignment="Left" Margin="10,109,0,0" VerticalAlignment="Top" IsChecked="True" Foreground="White" Background="White" BorderBrush="{x:Null}"/>
-                <RadioButton x:Name="RadioButtonDispersionAsSquare" Content="Dispersion as square" HorizontalAlignment="Left" Margin="10,129,0,0" VerticalAlignment="Top" Foreground="White" Background="White" BorderBrush="{x:Null}"/>
+                <Label Content="Points per click" HorizontalAlignment="Left" Margin="10,1,0,0" VerticalAlignment="Top" Width="90"/>
+                <Label Content="Dispersion" HorizontalAlignment="Left" Margin="10,55,0,0" VerticalAlignment="Top" Width="90"/>
+                <RadioButton Content="Dispersion as circle" HorizontalAlignment="Left" Margin="10,109,0,0" VerticalAlignment="Top" IsChecked="True"/>
+                <RadioButton x:Name="RadioButtonDispersionAsSquare" Content="Dispersion as square" HorizontalAlignment="Left" Margin="10,129,0,0" VerticalAlignment="Top"/>
             </Grid>
         </GroupBox>
         <Grid x:Name="BottomGrid" HorizontalAlignment="Left" Height="400" Margin="0,255,0,0" VerticalAlignment="Top" Width="190">
-            <Button x:Name="ButtonClear" Content="Clear" HorizontalAlignment="Left" Margin="10,0,0,0" Width="110" Height="20" VerticalAlignment="Top" Click="ButtonClear_Click" BorderBrush="#FF3F3F46" Background="#FF333337" Foreground="White"/>
-            <TextBox x:Name="TextBoxClustersNumber" HorizontalAlignment="Left" Height="23" Margin="10,50,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt" Background="#FF333337" Foreground="White" BorderBrush="{x:Null}"/>
-            <TextBox x:Name="TextBoxSilhouetteMethod" HorizontalAlignment="Left" Height="23" Margin="11,179,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="110" Background="#FF333337" BorderBrush="{x:Null}" Foreground="White"/>
-            <Button Content="Run" HorizontalAlignment="Left" Margin="10,285,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRun_Click" BorderBrush="#FF3F3F46" Background="#FF333337" Foreground="White"/>
-            <Label Content="Silhouette Method" HorizontalAlignment="Left" Margin="11,153,0,0" VerticalAlignment="Top" Foreground="White"/>
-            <TextBox x:Name="TextBoxSumOfSquaredError" HorizontalAlignment="Left" Height="23" Margin="10,125,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109" Foreground="White" Background="#FF333337" BorderBrush="{x:Null}"/>
-            <Label Content="Sum of Squared Error" HorizontalAlignment="Left" Margin="10,99,0,0" VerticalAlignment="Top" Foreground="White"/>
-            <Button Content="K-means" HorizontalAlignment="Left" Margin="10,310,0,0" VerticalAlignment="Top" Width="110" BorderBrush="#FF3F3F46" Background="#FF333337" Foreground="White" Click="ButtonKMeans_Click"/>
-            <TextBox x:Name="TextBoxXieBeniIndex" HorizontalAlignment="Left" Height="23" Margin="10,233,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109" Foreground="White" Background="#FF333337" BorderBrush="{x:Null}"/>
-            <Label Content="Xie-Beni index" HorizontalAlignment="Left" Margin="10,207,0,0" VerticalAlignment="Top" Foreground="White"/>
+            <Button x:Name="ButtonClear" Content="Clear" HorizontalAlignment="Left" Margin="10,0,0,0" Width="110" Height="20" VerticalAlignment="Top" Click="ButtonClear_Click"/>
+            <TextBox x:Name="TextBoxSilhouetteMethod" HorizontalAlignment="Left" Height="23" Margin="11,116,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="110"/>
+            <Label Content="Silhouette Method" HorizontalAlignment="Left" Margin="11,90,0,0" VerticalAlignment="Top"/>
+            <TextBox x:Name="TextBoxSumOfSquaredError" HorizontalAlignment="Left" Height="23" Margin="10,62,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109"/>
+            <Label Content="Sum of Squared Error" HorizontalAlignment="Left" Margin="10,36,0,0" VerticalAlignment="Top"/>
+            <TextBox x:Name="TextBoxXieBeniIndex" HorizontalAlignment="Left" Height="23" Margin="10,170,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109"/>
+            <Label Content="Xie-Beni index" HorizontalAlignment="Left" Margin="10,144,0,0" VerticalAlignment="Top"/>
+            <GroupBox Header="Run algorirhm" HorizontalAlignment="Left" Margin="10,198,0,0" VerticalAlignment="Top" Height="191" Width="175" BorderThickness="2" SizeChanged="GroupBoxDrawPoints_SizeChanged">
+                <Grid Margin="0,10,-2,3">
+                    <TextBox x:Name="TextBoxClustersNumber" HorizontalAlignment="Left" Height="23" Margin="10,23,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt"/>
+                    <Label x:Name="LabelClustersNumber" Content="Clusters number" HorizontalAlignment="Left" Margin="10,-3,0,0" VerticalAlignment="Top"/>
+                    <Button Content="MFA" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRun_Click"/>
+                    <Button Content="K-means" HorizontalAlignment="Left" Margin="10,135,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeans_Click"/>
+                    <TextBox x:Name="TextBoxFirefliesNumber" HorizontalAlignment="Left" Height="23" Margin="10,77,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt"/>
+                    <Label x:Name="LabelFirefliesNumber" Content="Fireflies number" HorizontalAlignment="Left" Margin="10,51,0,0" VerticalAlignment="Top"/>
+                </Grid>
+            </GroupBox>
         </Grid>
-        <Menu Height="20" VerticalAlignment="Top" Background="#FF2D2D30">
-            <MenuItem Header="File" Foreground="White">
-                <MenuItem x:Name="MenuItemSave" Header="Save" Click="MenuItemSave_Click" IsEnabled="{DynamicResource IsMenuItemSaveEnabled}" Foreground="White" Background="Black"/>
-                <MenuItem x:Name="MenuItemOpen" Header="Open" Click="MenuItemOpen_Click" Background="Black"/>
+        <Menu Height="20" VerticalAlignment="Top">
+            <MenuItem Header="File">
+                <MenuItem x:Name="MenuItemSave" Header="Save" Click="MenuItemSave_Click" IsEnabled="{DynamicResource IsMenuItemSaveEnabled}"/>
+                <MenuItem x:Name="MenuItemOpen" Header="Open" Click="MenuItemOpen_Click"/>
             </MenuItem>
         </Menu>
         <StatusBar Height="23" VerticalAlignment="Bottom" Background="#FF007ACC">
