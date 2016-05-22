@@ -75,7 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClusterPoint.cs" />
-    <Compile Include="Alghorithm.cs" />
+    <Compile Include="Algorithm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

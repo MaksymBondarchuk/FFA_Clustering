@@ -35,28 +35,31 @@ namespace FFA_Clustering
     /// </summary>
     public partial class MainWindow
     {
+        #region Private constants
         private const int GroupBoxDrawPointsHeight = 190;
         private const int HalfPointSize = 2;
         private const int IterationDelay = 125;
+        #endregion
 
+        #region Private properties
         private bool IsRunClicked { get; set; }
 
-        private bool IsInDrawPointsMode { get; set; }
-        private Alghorithm Alghorithm { get; }
+        private Algorithm Algorithm { get; }
         private Random Rand { get; } = new Random();
 
         private List<Color> Clrs { get; } = new List<Color>();
+        #endregion
 
         public MainWindow()
         {
             InitializeComponent();
 
-            GroupBoxDrawPoints.Height = 0;
+            //GroupBoxDrawPoints.Height = 0;
 
-            Alghorithm = new Alghorithm
+            this.Algorithm = new Algorithm
             {
-                RangeX = (int) CanvasMain.ActualWidth,
-                RangeY = (int) CanvasMain.ActualHeight,
+                RangeX = (int)CanvasMain.ActualWidth,
+                RangeY = (int)CanvasMain.ActualHeight,
                 Dimension = 2
             };
 
@@ -74,28 +77,9 @@ namespace FFA_Clustering
             e.Handled = !int.TryParse(e.Text, out result);
         }
 
-        private void ButtonDrawPoints_Click(object sender, RoutedEventArgs e)
-        {
-            var da = new DoubleAnimation
-            {
-                From = IsInDrawPointsMode ? GroupBoxDrawPointsHeight : 0,
-                To = IsInDrawPointsMode ? 0 : GroupBoxDrawPointsHeight,
-                Duration = new Duration(TimeSpan.FromMilliseconds(250))
-            };
-            GroupBoxDrawPoints.BeginAnimation(HeightProperty, da);
-
-            IsInDrawPointsMode = !IsInDrawPointsMode;
-
-            BottomGrid.IsEnabled = !IsInDrawPointsMode;
-
-            ButtonDrawPoints.Content = IsInDrawPointsMode ?
-                Properties.Resources.ButtonDrawPointsDrawModeCaption :
-                Properties.Resources.ButtonDrawPointsDefaultModeCaption;
-        }
-
         private void CanvasMain_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (!IsInDrawPointsMode ||
+            if (TabControlMain.SelectedIndex == 0 ||    // Test mode
                 TextBoxDispersion.Text.Equals(string.Empty) ||
                 TextBoxPointsPerClick.Text.Equals(string.Empty))
                 return;
@@ -138,30 +122,23 @@ namespace FFA_Clustering
                 var p = new ClusterPoint();
                 p.X.Add(x);
                 p.X.Add(y);
-                Alghorithm.Points.Add(p);
+                this.Algorithm.Points.Add(p);
                 Application.Current.Resources["IsMenuItemSaveEnabled"] = true;
             }
         }
 
         private void ButtonClear_Click(object sender, RoutedEventArgs e)
         {
-            Alghorithm.Points.Clear();
+            this.Algorithm.Points.Clear();
             CanvasMain.Children.Clear();
 
             Application.Current.Resources["IsMenuItemSaveEnabled"] = false;
             TextBoxSilhouetteMethod.Text = string.Empty;
         }
 
-        private void GroupBoxDrawPoints_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            BottomGrid.Margin = new Thickness(BottomGrid.Margin.Left,
-                GroupBoxDrawPoints.Margin.Top + GroupBoxDrawPoints.Height + 10,
-                BottomGrid.Margin.Right, BottomGrid.Margin.Bottom);
-        }
-
         private void Draw()
         {
-            foreach (var point in Alghorithm.Points)
+            foreach (var point in this.Algorithm.Points)
             {
                 var pointColor = !IsRunClicked && point.BelongsToCentroid != -1 ? Clrs[point.BelongsToCentroid] : Colors.Red;
                 CanvasMain.Children.Add(new Rectangle
@@ -174,12 +151,12 @@ namespace FFA_Clustering
                 });
             }
 
-            for (var ffI = 0; ffI < Alghorithm.Fireflies.Count; ffI++)
+            for (var ffI = 0; ffI < this.Algorithm.Fireflies.Count; ffI++)
             {
                 if (!IsRunClicked && ffI != 0)
                     return;
 
-                var firefly = Alghorithm.Fireflies[ffI];
+                var firefly = this.Algorithm.Fireflies[ffI];
                 for (var j = 0; j < firefly.Centroids.Count; j++)
                 //foreach (var fireflyPoint in firefly.Centroids)
                 {
@@ -221,9 +198,8 @@ namespace FFA_Clustering
 
             var obj = new JsonObject
             {
-                IsClustered = Alghorithm.Fireflies.Count != 0,
-                Points = Alghorithm.Points,
-                Fireflies = Alghorithm.Fireflies
+                Points = this.Algorithm.Points,
+                Fireflies = this.Algorithm.Fireflies
             };
             var json = new JavaScriptSerializer().Serialize(obj);
             var file = new StreamWriter(fileName);
@@ -257,13 +233,13 @@ namespace FFA_Clustering
             file.Close();
 
             ButtonClear.PerformClick();
-            Alghorithm.Points = new List<ClusterPoint>(results.Points);
-            Alghorithm.Fireflies = new List<Firefly>(results.Fireflies);
+            this.Algorithm.Points = new List<ClusterPoint>(results.Points);
+            this.Algorithm.Fireflies = new List<Firefly>(results.Fireflies);
 
             var firstFirefly = results.Fireflies.FirstOrDefault();
-            Alghorithm.Dimension = firstFirefly?.Centroids.Count ?? 5;
+            this.Algorithm.Dimension = firstFirefly?.Centroids.Count ?? 5;
 
-            TextBoxClustersNumber.Text = Alghorithm.Dimension.ToString();
+            TextBoxClustersNumber.Text = this.Algorithm.Dimension.ToString();
             Draw();
         }
 
@@ -282,32 +258,31 @@ namespace FFA_Clustering
         {
             IsRunClicked = true;
 
-            Alghorithm.RangeX = (int) CanvasMain.ActualWidth;
-            Alghorithm.RangeY = (int) CanvasMain.ActualHeight;
-            Alghorithm.Dimension = 2;
+            this.Algorithm.RangeX = (int)CanvasMain.ActualWidth;
+            this.Algorithm.RangeY = (int)CanvasMain.ActualHeight;
+            this.Algorithm.Dimension = 2;
 
             var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
-            Alghorithm.Itialization(Convert.ToInt32(TextBoxFirefliesNumber.Text), clustersNumber);
+            this.Algorithm.Initialization(Convert.ToInt32(TextBoxFirefliesNumber.Text), clustersNumber);
 
-            for (var iter = 0; iter < Alghorithm.MaximumGenerations; iter++)
+            for (var iter = 0; iter < Algorithm.MaximumGenerations; iter++)
             {
-                await Alghorithm.Iteration(iter);
+                await this.Algorithm.Iteration(iter);
 
-                var ff = Alghorithm.Fireflies.First();
+                var ff = this.Algorithm.Fireflies.First();
                 TextBoxSumOfSquaredError.Text = $"{ff.SumOfSquaredError,-18:0.}";
-                TextBoxSilhouetteMethod.Text = $"{Alghorithm.SilhouetteMethod(ff),-18:0.0000000000}";
-                TextBoxXieBeniIndex.Text = $"{Alghorithm.XieBeniIndex(ff),-18:0.0000000000}";
+                TextBoxSilhouetteMethod.Text = $"{this.Algorithm.SilhouetteMethod(ff),-18:0.0000000000}";
+                TextBoxXieBeniIndex.Text = $"{this.Algorithm.XieBeniIndex(ff),-18:0.0000000000}";
 
-                Alghorithm.UpdatePoints(Alghorithm.Fireflies.First());
+                this.Algorithm.UpdatePoints(this.Algorithm.Fireflies.First());
                 CanvasMain.Children.Clear();
-                if (iter == Alghorithm.MaximumGenerations - 1 ||
-                    Alghorithm.MfaFinished)
+                if (iter == Algorithm.MaximumGenerations - 1)
                 {
                     IsRunClicked = false;
                     await CanvasFlash();
                 }
                 Draw();
-                ProgressBarInfo.Value = iter * 100 /(double) Alghorithm.MaximumGenerations;
+                ProgressBarInfo.Value = iter * 100 / (double)Algorithm.MaximumGenerations;
                 LabelInfo.Content = $"Iteration #{iter}";
                 await Task.Delay(IterationDelay);
             }
@@ -317,31 +292,31 @@ namespace FFA_Clustering
         {
             IsRunClicked = false;
 
-            Alghorithm.RangeX = (int) CanvasMain.ActualWidth;
-            Alghorithm.RangeY = (int) CanvasMain.ActualHeight;
-            Alghorithm.Dimension = 2;
+            this.Algorithm.RangeX = (int)CanvasMain.ActualWidth;
+            this.Algorithm.RangeY = (int)CanvasMain.ActualHeight;
+            this.Algorithm.Dimension = 2;
 
             var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
-            Alghorithm.ItializationKMeans(clustersNumber);
+            this.Algorithm.InitializationKMeans(clustersNumber);
 
-            for (var iter = 0; iter < Alghorithm.MaximumGenerations; iter++)
+            for (var iter = 0; iter < Algorithm.MaximumGenerations; iter++)
             {
-                await Alghorithm.IterationKMeans();
+                await this.Algorithm.IterationKMeans();
 
-                var ff = Alghorithm.Fireflies.First();
+                var ff = this.Algorithm.Fireflies.First();
                 TextBoxSumOfSquaredError.Text = $"{ff.SumOfSquaredError,-18:0.}";
-                TextBoxSilhouetteMethod.Text = $"{Alghorithm.SilhouetteMethod(ff),-18:0.0000000000}";
-                TextBoxXieBeniIndex.Text = $"{Alghorithm.XieBeniIndex(ff),-18:0.0000000000}";
-                Alghorithm.UpdatePoints(ff);
+                TextBoxSilhouetteMethod.Text = $"{this.Algorithm.SilhouetteMethod(ff),-18:0.0000000000}";
+                TextBoxXieBeniIndex.Text = $"{this.Algorithm.XieBeniIndex(ff),-18:0.0000000000}";
+                this.Algorithm.UpdatePoints(ff);
                 CanvasMain.Children.Clear();
                 Draw();
                 LabelInfo.Content = $"Iteration #{iter}";
                 await Task.Delay(IterationDelay);
 
-                if (!Alghorithm.KMeansCanStop) continue;
+                if (!this.Algorithm.KMeansCanStop) continue;
                 LabelInfo.Content = "K-means finished";
                 await CanvasFlash();
-                
+
                 return;
             }
         }

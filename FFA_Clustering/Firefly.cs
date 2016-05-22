@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Documents;
+﻿using System.Collections.Generic;
 
 namespace FFA_Clustering
 {
     public class Firefly
     {
-        public List<ClusterPoint> Centroids { get; set; } = new List<ClusterPoint>();
-        public List<List<int>> CentroidPoints { get; set; } = new List<List<int>>();
-
-        private Random Rand { get; } = new Random();
+        public List<ClusterPoint> Centroids { get; } = new List<ClusterPoint>();
+        public List<List<int>> CentroidPoints { get; } = new List<List<int>>();
 
         public double SumOfSquaredError { get; set; }
-
-        
     }
 }

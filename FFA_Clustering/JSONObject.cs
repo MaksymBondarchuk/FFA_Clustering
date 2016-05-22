@@ -1,15 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="JSONObject.cs" company="NTUU 'KPI'">
+//   Created by Max Bondarchuk
+// </copyright>
+// <summary>
+//   Defines the JsonObject type.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace FFA_Clustering
 {
+    using System.Collections.Generic;
+
+    /// <summary>
+    /// Class for load to/upload from JSON-file data set
+    /// </summary>
     public class JsonObject
     {
-        public bool IsClustered;
-        public List<ClusterPoint> Points;
-        public List<Firefly> Fireflies;
+        /// <summary>
+        /// Gets or sets the points.
+        /// </summary>
+        public List<ClusterPoint> Points { get; set; }
+
+        /// <summary>
+        /// Gets or sets the fireflies.
+        /// </summary>
+        public List<Firefly> Fireflies { get; set; }
     }
 }
