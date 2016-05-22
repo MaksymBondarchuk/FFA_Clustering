@@ -23,32 +23,34 @@
         </StatusBar>
         <TabControl x:Name="TabControlMain" Margin="10,25,0,28" HorizontalAlignment="Left" Width="195">
             <TabItem Header="Test mode">
-                    <Grid>
-                        <TextBox x:Name="TextBoxSilhouetteMethod" HorizontalAlignment="Left" Height="23" Margin="11,81,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="110"/>
-                        <Label Content="Silhouette Method" HorizontalAlignment="Left" Margin="11,55,0,0" VerticalAlignment="Top"/>
-                        <TextBox x:Name="TextBoxSumOfSquaredError" HorizontalAlignment="Left" Height="23" Margin="10,27,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109"/>
-                        <Label Content="Sum of Squared Error" HorizontalAlignment="Left" Margin="10,1,0,0" VerticalAlignment="Top"/>
-                        <TextBox x:Name="TextBoxXieBeniIndex" HorizontalAlignment="Left" Height="23" Margin="10,135,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109"/>
-                        <Label Content="Xie-Beni index" HorizontalAlignment="Left" Margin="10,109,0,0" VerticalAlignment="Top"/>
-                        <TabControl HorizontalAlignment="Left" Height="100" Margin="10,198,0,0" VerticalAlignment="Top" Width="160">
-                            <TabItem Header="Run algorirhm">
-                                <Grid>
-                                    <Button Content="MFA" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRun_Click" TabIndex="0"/>
-                                    <Button Content="K-means" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeans_Click"/>
-                                </Grid>
-                            </TabItem>
-                            <TabItem Header="Test">
-                                <Grid>
-                                    <TextBox x:Name="TextBoxRunsNumber" HorizontalAlignment="Left" Height="23" Margin="10,36,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt"/>
-                                    <Label Content="Runs number" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-                                </Grid>
-                            </TabItem>
-                        </TabControl>
-                        <TextBox x:Name="TextBoxClustersNumber" HorizontalAlignment="Left" Height="23" Margin="11,327,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt"/>
-                        <Label Content="Clusters number" HorizontalAlignment="Left" Margin="11,301,0,0" VerticalAlignment="Top"/>
-                        <TextBox x:Name="TextBoxFirefliesNumber" HorizontalAlignment="Left" Height="23" Margin="11,376,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt"/>
-                        <Label Content="Fireflies number" HorizontalAlignment="Left" Margin="11,350,0,0" VerticalAlignment="Top"/>
-                    </Grid>
+                <Grid>
+                    <TextBox x:Name="TextBoxSilhouetteMethod" HorizontalAlignment="Left" Height="23" Margin="11,81,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="110"/>
+                    <Label Content="Silhouette Method" HorizontalAlignment="Left" Margin="11,55,0,0" VerticalAlignment="Top"/>
+                    <TextBox x:Name="TextBoxSumOfSquaredError" HorizontalAlignment="Left" Height="23" Margin="10,27,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109"/>
+                    <Label Content="Sum of Squared Error" HorizontalAlignment="Left" Margin="10,1,0,0" VerticalAlignment="Top"/>
+                    <TextBox x:Name="TextBoxXieBeniIndex" HorizontalAlignment="Left" Height="23" Margin="10,135,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109"/>
+                    <Label Content="Xie-Beni index" HorizontalAlignment="Left" Margin="10,109,0,0" VerticalAlignment="Top"/>
+                    <TabControl HorizontalAlignment="Left" Height="142" Margin="10,198,0,0" VerticalAlignment="Top" Width="160">
+                        <TabItem Header="Run algorithm">
+                            <Grid>
+                                <Button x:Name="ButtonMfa" Content="MFA" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRunClick" TabIndex="0"/>
+                                <Button x:Name="ButtonKmeans" Content="K-means" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeansClick"/>
+                                <Button x:Name="ButtonKmeansPlusPlus" Content="K-means++" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeansClick"/>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="Test">
+                            <Grid>
+                                <TextBox x:Name="TextBoxRunsNumber" HorizontalAlignment="Left" Height="23" Margin="10,36,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt"/>
+                                <Label Content="Runs number" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                                <Button Content="Run" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" Width="110" TabIndex="0" Click="ButtonRunTestsClick"/>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                    <TextBox x:Name="TextBoxClustersNumber" HorizontalAlignment="Left" Height="23" Margin="11,396,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt"/>
+                    <Label Content="Clusters number" HorizontalAlignment="Left" Margin="11,370,0,0" VerticalAlignment="Top"/>
+                    <TextBox x:Name="TextBoxFirefliesNumber" HorizontalAlignment="Left" Height="23" Margin="11,445,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt"/>
+                    <Label Content="Fireflies number" HorizontalAlignment="Left" Margin="11,419,0,0" VerticalAlignment="Top"/>
+                </Grid>
             </TabItem>
             <TabItem Header="Draw mode">
                 <Grid>

@@ -77,5 +77,32 @@ namespace FFA_Clustering.Properties {
                 return ResourceManager.GetString("ButtonDrawPointsDrawModeCaption", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to K-means.
+        /// </summary>
+        internal static string Kmeans {
+            get {
+                return ResourceManager.GetString("Kmeans", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to K-means++.
+        /// </summary>
+        internal static string KmeansPlusPlus {
+            get {
+                return ResourceManager.GetString("KmeansPlusPlus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MFA.
+        /// </summary>
+        internal static string ModifiedFireflyAlgorithm {
+            get {
+                return ResourceManager.GetString("ModifiedFireflyAlgorithm", resourceCulture);
+            }
+        }
     }
 }

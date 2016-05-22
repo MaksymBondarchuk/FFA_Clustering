@@ -21,7 +21,7 @@ namespace System.Windows.Controls
     /// </summary>
     public static class MyExt
     {
-        public static void PerformClick(this Button btn)
+        public static async Task PerformClick(this Button btn)
         {
             btn.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
         }
@@ -30,6 +30,8 @@ namespace System.Windows.Controls
 
 namespace FFA_Clustering
 {
+    using System.Globalization;
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -43,6 +45,8 @@ namespace FFA_Clustering
 
         #region Private properties
         private bool IsRunClicked { get; set; }
+
+        private string LabelInfoRequiredPart { get; set; }
 
         private Algorithm Algorithm { get; }
         private Random Rand { get; } = new Random();
@@ -254,7 +258,12 @@ namespace FFA_Clustering
                 MenuItemOpen.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
         }
 
-        private async void ButtonRun_Click(object sender, RoutedEventArgs e)
+        private async void ButtonRunClick(object sender, RoutedEventArgs e)
+        {
+            await this.ButtonRunClickTask();
+        }
+
+        private async Task ButtonRunClickTask()
         {
             IsRunClicked = true;
 
@@ -283,12 +292,17 @@ namespace FFA_Clustering
                 }
                 Draw();
                 ProgressBarInfo.Value = iter * 100 / (double)Algorithm.MaximumGenerations;
-                LabelInfo.Content = $"Iteration #{iter}";
+                LabelInfo.Content = $"{this.LabelInfoRequiredPart}Iteration #{iter}";
                 await Task.Delay(IterationDelay);
             }
         }
 
-        private async void ButtonKMeans_Click(object sender, RoutedEventArgs e)
+        private async void ButtonKMeansClick(object sender, RoutedEventArgs e)
+        {
+            await this.ButtonKMeansClickTask(sender);
+        }
+
+        private async Task ButtonKMeansClickTask(object sender)
         {
             IsRunClicked = false;
 
@@ -296,8 +310,12 @@ namespace FFA_Clustering
             this.Algorithm.RangeY = (int)CanvasMain.ActualHeight;
             this.Algorithm.Dimension = 2;
 
-            var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
-            this.Algorithm.InitializationKMeans(clustersNumber);
+            var clustersNumber = Convert.ToInt32(this.TextBoxClustersNumber.Text);
+            var button = sender as Button;
+            if (button != null && ReferenceEquals(button.Content, "K-means"))
+                this.Algorithm.InitializationKMeans(clustersNumber);
+            else
+                this.Algorithm.InitializationKMeansPlusPlus(clustersNumber);
 
             for (var iter = 0; iter < Algorithm.MaximumGenerations; iter++)
             {
@@ -310,11 +328,11 @@ namespace FFA_Clustering
                 this.Algorithm.UpdatePoints(ff);
                 CanvasMain.Children.Clear();
                 Draw();
-                LabelInfo.Content = $"Iteration #{iter}";
+                LabelInfo.Content = $"{this.LabelInfoRequiredPart}Iteration #{iter}";
                 await Task.Delay(IterationDelay);
 
                 if (!this.Algorithm.KMeansCanStop) continue;
-                LabelInfo.Content = "K-means finished";
+                LabelInfo.Content = $"{this.LabelInfoRequiredPart}K-means finished";
                 await CanvasFlash();
 
                 return;
@@ -323,31 +341,89 @@ namespace FFA_Clustering
 
         private async Task CanvasFlash()
         {
-            const int animationWait = 150;
-            var prevColor = new SolidColorBrush(((SolidColorBrush)CanvasMain.Background).Color).Color;
-            var cb = CanvasMain.Background;
+            const int AnimationWait = 150;
+            var previousColor = new SolidColorBrush(((SolidColorBrush)this.CanvasMain.Background).Color).Color;
+            var cb = this.CanvasMain.Background;
             var convertFromString = ColorConverter.ConvertFromString("#FF007ACC");
             if (convertFromString != null)
             {
                 var da = new ColorAnimation
                 {
-                    From = prevColor,
+                    From = previousColor,
                     To = (Color)convertFromString,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+                    Duration = new Duration(TimeSpan.FromMilliseconds(AnimationWait))
                 };
                 cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
             }
-            await Task.Delay(animationWait);
+            await Task.Delay(AnimationWait);
             if (convertFromString != null)
             {
                 var da1 = new ColorAnimation
                 {
                     From = (Color)convertFromString,
-                    To = prevColor,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+                    To = previousColor,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(AnimationWait))
                 };
                 cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
             }
         }
+
+        #region Tests
+
+        class TestListViewItem
+        {
+            public string Algorithm { get; set; }
+            public string SumOfSquaredError { get; set; }
+            public string SilhouetteMethod { get; set; }
+            public string XieBeniIndex { get; set; }
+        }
+
+        private async Task<TestListViewItem> GetResult(string algorithm)
+        {
+            Func<Task> action;
+            if (algorithm.Equals(Properties.Resources.Kmeans))
+                action = async () => { await this.ButtonKMeansClickTask(this.ButtonKmeans); };
+            else if (algorithm.Equals(Properties.Resources.KmeansPlusPlus))
+                action = async () => { await this.ButtonKMeansClickTask(this.ButtonKmeans); };
+            else action = async () => { await this.ButtonRunClickTask(); };
+
+            var sse = 0.0;
+            var sm = 0.0;
+            var xb = 0.0;
+            var runsNumber = Convert.ToInt32(this.TextBoxRunsNumber.Text);
+            for (var i = 0; i < runsNumber; i++)
+            {
+                //this.LabelInfo.Content = $"Testing {algorithm}. Iteration #{i}";
+                this.LabelInfoRequiredPart = $"Testing {algorithm}. Test #{i}: ";
+                await action();
+                //await button.PerformClick();
+                sse += Convert.ToDouble(this.TextBoxSumOfSquaredError.Text);
+                sm += Convert.ToDouble(this.TextBoxSilhouetteMethod.Text);
+                xb += Convert.ToDouble(this.TextBoxXieBeniIndex.Text);
+            }
+
+
+            return new TestListViewItem
+            {
+                Algorithm = algorithm,
+                SumOfSquaredError = Convert.ToString(sse / runsNumber, CultureInfo.InvariantCulture),
+                SilhouetteMethod = Convert.ToString(sm / runsNumber, CultureInfo.InvariantCulture),
+                XieBeniIndex = Convert.ToString(xb / runsNumber, CultureInfo.InvariantCulture)
+            };
+        }
+
+        private async void ButtonRunTestsClick(object sender, RoutedEventArgs e)
+        {
+            var testResultsWindow = new TestResultsWindow();
+            var a = await this.GetResult(Properties.Resources.Kmeans);
+            testResultsWindow.ListViewInfoTestResults.Items.Add(a);
+            testResultsWindow.ListViewInfoTestResults.Items.Add(await this.GetResult(Properties.Resources.KmeansPlusPlus));
+            testResultsWindow.ListViewInfoTestResults.Items.Add(await this.GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
+            testResultsWindow.Show();
+            this.LabelInfoRequiredPart = string.Empty;
+            this.LabelInfo.Content = "Test are finished";
+        }
+
+        #endregion
     }
 }

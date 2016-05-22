@@ -145,6 +145,7 @@ namespace FFA_Clustering
         }
         #endregion
 
+        #region MFA
         public void Initialization(int firefliesNumber, int clustersNumber)
         {
             this.Fireflies.Clear();
@@ -231,8 +232,18 @@ namespace FFA_Clustering
             var y = Math.Abs(this.GaussianRandom(0, 1.0));
             return x / Math.Pow(y, lambda1);
         }
+        #endregion
 
+        #region K-means
         public void InitializationKMeans(int clustersNumber)
+        {
+            this.KMeansCanStop = false;
+            this.Fireflies.Clear();
+            this.AddRandomFireflies(1, clustersNumber);
+            this.FillCentroidPoints(this.Fireflies.First());
+        }
+
+        public void InitializationKMeansPlusPlus(int clustersNumber)
         {
             this.KMeansCanStop = false;
             this.Fireflies.Clear();
@@ -276,7 +287,6 @@ namespace FFA_Clustering
 
             await Task.Delay(0);
         }
-
-
+        #endregion
     }
 }

@@ -123,4 +123,13 @@
   <data name="ButtonDrawPointsDrawModeCaption" xml:space="preserve">
     <value>Exit draw mode</value>
   </data>
+  <data name="Kmeans" xml:space="preserve">
+    <value>K-means</value>
+  </data>
+  <data name="KmeansPlusPlus" xml:space="preserve">
+    <value>K-means++</value>
+  </data>
+  <data name="ModifiedFireflyAlgorithm" xml:space="preserve">
+    <value>MFA</value>
+  </data>
 </root>
