@@ -8,9 +8,8 @@ namespace FFA_Clustering
         /// <summary>
         /// Coordinates
         /// </summary>
+        // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global (without this "set" JSON-file cannot be loaded)
         public List<double> X { get; set; } = new List<double>();
-
-        public bool IsCentroid { get; set; }
 
         /// <summary>
         /// Number of centroid point belongs to
@@ -19,7 +18,7 @@ namespace FFA_Clustering
 
         public double Dist2To(ClusterPoint cp)
         {
-            return X.Select((t, i) => (t - cp.X[i])*(t - cp.X[i])).Sum();
+            return this.X.Select((t, i) => (t - cp.X[i])*(t - cp.X[i])).Sum();
         }
     }
 }

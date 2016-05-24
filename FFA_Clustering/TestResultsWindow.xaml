@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="TestResults" Height="200" Width="554">
+        Title="Test Results" Height="200" Width="554" Closed="WindowClosed" WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight" ResizeMode="NoResize" Topmost="True">
     <Grid>
         <ListView x:Name="ListViewInfoTestResults" Margin="10,10,10,10" IsHitTestVisible="True" BorderThickness="1" Background="White">
             <ListView.View>
