@@ -16,7 +16,6 @@ using Microsoft.Win32;
 namespace FFA_Clustering
 {
     using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -527,9 +526,9 @@ namespace FFA_Clustering
                 xb += Convert.ToDouble(this.TextBoxXieBeniIndex.Text);
             }
 
-            var sseText = Convert.ToString(sse / runsNumber, CultureInfo.InvariantCulture);
-            var smText = Convert.ToString(sm / runsNumber, CultureInfo.InvariantCulture);
-            var xbText = Convert.ToString(xb / runsNumber, CultureInfo.InvariantCulture);
+            var sseText = $"{sse / runsNumber,20}";
+            var smText = $"{sm / runsNumber,-20:0.0000000000}";
+            var xbText = $"{xb / runsNumber,-20:0.0000000000}";
             this.ClipboardMessage += $"{algorithm};{sseText};{smText};{xbText}";
             return new TestListViewItem
             {
