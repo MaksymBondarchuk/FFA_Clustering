@@ -19,11 +19,11 @@
         </Menu>
         <StatusBar Height="23" VerticalAlignment="Bottom" Background="#FF007ACC">
             <Label x:Name="LabelInfo" Content="Ready" HorizontalAlignment="Center" VerticalAlignment="Top" Width="265" VerticalContentAlignment="Center" Foreground="White" Padding="0"/>
-            <ProgressBar x:Name="ProgressBarInfo" Background="#FF007ACC" BorderBrush="{x:Null}" Height="14" Width="292"/>
+            <ProgressBar x:Name="ProgressBarInfo" Background="#FF007ACC" BorderBrush="{x:Null}" Height="14" Width="532" Foreground="#FF4CA2DB"/>
         </StatusBar>
         <TabControl x:Name="TabControlMain" Margin="10,25,0,28" HorizontalAlignment="Left" Width="195">
             <TabItem Header="Test mode">
-                <Grid>
+                <Grid IsEnabled="{DynamicResource IsMenuItemSaveEnabled}">
                     <TextBox x:Name="TextBoxSilhouetteMethod" HorizontalAlignment="Left" Height="23" Margin="11,81,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="110"/>
                     <Label Content="Silhouette Method" HorizontalAlignment="Left" Margin="11,55,0,0" VerticalAlignment="Top"/>
                     <TextBox x:Name="TextBoxSumOfSquaredError" HorizontalAlignment="Left" Height="23" Margin="10,27,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109"/>
@@ -56,7 +56,7 @@
                 <Grid>
                     <GroupBox Header="Draw points properties" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="190" Width="175" BorderThickness="2" Grid.ColumnSpan="2">
                         <Grid Margin="0,10,-2,3">
-                            <TextBox x:Name="TextBoxPointsPerClick" HorizontalAlignment="Left" Height="23" Margin="10,27,0,0" TextWrapping="Wrap" Text="50" VerticalAlignment="Top" Width="90" PreviewTextInput="CheckTextForInt" TextInput="CheckTextForInt"/>
+                            <TextBox x:Name="TextBoxPointsPerClick" HorizontalAlignment="Left" Height="23" Margin="10,27,0,0" TextWrapping="Wrap" Text="250" VerticalAlignment="Top" Width="90" PreviewTextInput="CheckTextForInt" TextInput="CheckTextForInt"/>
                             <TextBox x:Name="TextBoxDispersion" HorizontalAlignment="Left" Height="23" Margin="10,81,0,0" TextWrapping="Wrap" Text="200" VerticalAlignment="Top" Width="90" PreviewTextInput="CheckTextForInt"/>
                             <Label Content="Points per click" HorizontalAlignment="Left" Margin="10,1,0,0" VerticalAlignment="Top" Width="90"/>
                             <Label Content="Dispersion" HorizontalAlignment="Left" Margin="10,55,0,0" VerticalAlignment="Top" Width="90"/>

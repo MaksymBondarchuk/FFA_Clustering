@@ -14,7 +14,7 @@ namespace FFA_Clustering
     /// <summary>
     /// Window for test results
     /// </summary>
-    public partial class TestResultsWindow : IDisposable
+    public partial class TestResultsWindow
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TestResultsWindow"/> class. 
@@ -23,21 +23,6 @@ namespace FFA_Clustering
         public TestResultsWindow()
         {
             this.InitializeComponent();
-        }
-
-        /// <summary>
-        /// On window close
-        /// </summary>
-        /// <param name="sender">Parent</param>
-        /// <param name="e">Events</param>
-        private void WindowClosed(object sender, System.EventArgs e)
-        {
-            
-        }
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
         }
     }
 }

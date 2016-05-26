@@ -16,6 +16,7 @@ using Microsoft.Win32;
 namespace FFA_Clustering
 {
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -43,7 +44,11 @@ namespace FFA_Clustering
 
         private List<Color> Clrs { get; } = new List<Color>();
 
-        private SolidColorBrush ClickBrush { get; set; } = new SolidColorBrush(Colors.SlateGray);
+        private SolidColorBrush ClickBrush { get; set; } = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF007ACC"));
+
+        private int CanvasClicks { get; set; } = 0;
+
+        private int CanvasClicksHandled { get; set; } = 0;
         #endregion
 
         #region Constructor
@@ -70,17 +75,17 @@ namespace FFA_Clustering
 
         private async void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            await Task.Delay(1000);
-            await this.Dispatcher.BeginInvoke((Action)(() => this.TabControlMain.SelectedIndex = 1));
+            //await Task.Delay(1000);
+            //await this.Dispatcher.BeginInvoke((Action)(() => this.TabControlMain.SelectedIndex = 1));
 
-            await this.MouseClick(new Point(100, 100));
-            await Task.Delay(1000);
+            //await this.MouseClick(new Point(100, 100));
+            //await Task.Delay(1000);
 
-            await this.MouseClick(new Point(200, 200));
-            await Task.Delay(1000);
+            //await this.MouseClick(new Point(200, 200));
+            //await Task.Delay(1000);
 
-            await this.MouseClick(new Point(300, 300));
-            await Task.Delay(1000);
+            //await this.MouseClick(new Point(300, 300));
+            //await Task.Delay(1000);
         }
         #endregion
 
@@ -137,33 +142,21 @@ namespace FFA_Clustering
             #region Click animation
 
             var newBrush = new SolidColorBrush(this.ClickBrush.Color);
-            var line1 = new Line
+
+            var circle = new Ellipse
             {
-                X1 = mouseLocation.X - ClickDispersion,
-                Y1 = mouseLocation.Y - ClickDispersion,
-                X2 = mouseLocation.X + ClickDispersion,
-                Y2 = mouseLocation.Y + ClickDispersion,
-                StrokeThickness = ClickLineStroke,
-                Stroke = this.ClickBrush
-            };
-            var line2 = new Line
-            {
-                X1 = mouseLocation.X - ClickDispersion,
-                Y1 = mouseLocation.Y + ClickDispersion,
-                X2 = mouseLocation.X + ClickDispersion,
-                Y2 = mouseLocation.Y - ClickDispersion,
-                StrokeThickness = ClickLineStroke,
-                Stroke = this.ClickBrush
+                Height = ClickDispersion * 2,
+                Width = ClickDispersion * 2,
+                StrokeThickness = 2,
+                Stroke = new SolidColorBrush(Colors.Transparent),
+                Fill = this.ClickBrush,
+                Margin = new Thickness(mouseLocation.X - ClickDispersion, mouseLocation.Y - ClickDispersion, 0, 0)
             };
 
-            this.CanvasMain.Children.Add(line1);
-            this.CanvasMain.Children.Add(line2);
+            this.CanvasMain.Children.Add(circle);
+            await this.ClickFlash(circle);
 
-            var t1 = this.ClickFlash(line1);
-            var t2 = this.ClickFlash(line2);
-
-            await Task.WhenAll(t1, t2);
-            this.CanvasMain.Children.RemoveRange(this.CanvasMain.Children.Count - 2, 2);
+            this.CanvasMain.Children.RemoveAt(this.CanvasMain.Children.Count - 1);
             this.ClickBrush = newBrush;
             #endregion
 
@@ -172,6 +165,8 @@ namespace FFA_Clustering
                 return;
 
             #region Draw points
+
+            this.CanvasClicks++;
             for (var i = 0; i < pointsPerClick; i++)
             {
                 int x, y;
@@ -202,8 +197,10 @@ namespace FFA_Clustering
                 p.X.Add(x);
                 p.X.Add(y);
                 this.Algorithm.Points.Add(p);
-                Application.Current.Resources["IsMenuItemSaveEnabled"] = true;
+                await Task.Delay(1);
             }
+            this.CanvasClicksHandled++;
+            Application.Current.Resources["IsMenuItemSaveEnabled"] = this.CanvasClicks == this.CanvasClicksHandled;
             #endregion
         }
         #endregion
@@ -277,7 +274,7 @@ namespace FFA_Clustering
 
             var clustersNumber = Convert.ToInt32(this.TextBoxClustersNumber.Text);
             var button = sender as Button;
-            if (button != null && ReferenceEquals(button.Content, "K-means"))
+            if (Equals(button, this.ButtonKmeans))
                 this.Algorithm.InitializationKMeans(clustersNumber);
             else
                 this.Algorithm.InitializationKMeansPlusPlus(clustersNumber);
@@ -297,7 +294,10 @@ namespace FFA_Clustering
                 await Task.Delay(IterationDelay);
 
                 if (!this.Algorithm.KMeansCanStop) continue;
-                this.LabelInfo.Content = $"{this.LabelInfoRequiredPart}K-means finished";
+                if (Equals(button, this.ButtonKmeans))
+                    this.LabelInfo.Content = $"{this.LabelInfoRequiredPart}K-means finished";
+                else
+                    this.LabelInfo.Content = $"{this.LabelInfoRequiredPart}K-means++ finished";
                 await this.CanvasFlash();
 
                 return;
@@ -323,9 +323,9 @@ namespace FFA_Clustering
             if (this.Algorithm.Fireflies.Count != 0)
             {
                 var ff = this.Algorithm.Fireflies.First();
-                this.TextBoxSumOfSquaredError.Text = $"{ff.SumOfSquaredError,-18:0.}";
-                this.TextBoxSilhouetteMethod.Text = $"{this.Algorithm.SilhouetteMethod(ff),-18:0.0000000000}";
-                this.TextBoxXieBeniIndex.Text = $"{this.Algorithm.XieBeniIndex(ff),-18:0.0000000000}";
+                this.TextBoxSumOfSquaredError.Text = $"{ff.SumOfSquaredError}";
+                this.TextBoxSilhouetteMethod.Text = $"{this.Algorithm.SilhouetteMethod(ff),-10:0.00000000}";
+                this.TextBoxXieBeniIndex.Text = $"{this.Algorithm.XieBeniIndex(ff),-10:0.00000000}";
                 this.Algorithm.UpdatePoints(ff);
                 this.CanvasMain.Children.Clear();
             }
@@ -348,22 +348,24 @@ namespace FFA_Clustering
                 if (!this.IsRunClicked && ffI != 0)
                     return;
 
+                var offset = (this.IsRunClicked && ffI == 0 ? 8 * HalfPointSize : 4 * HalfPointSize) * .5;
+                var sz = 2 * offset;
+
                 var firefly = this.Algorithm.Fireflies[ffI];
                 for (var j = 0; j < firefly.Centroids.Count; j++)
                 //foreach (var fireflyPoint in firefly.Centroids)
                 {
                     var fireflyPoint = firefly.Centroids[j];
                     //if (IsRunClicked)
-                    var sz = this.IsRunClicked && ffI == 0 ? 8 * HalfPointSize : 4 * HalfPointSize;
                     var clr = this.IsRunClicked ? this.Clrs[ffI] : this.Clrs[j];
                     //var sz = 4 * HalfPointSize;
                     this.CanvasMain.Children.Add(new Rectangle
                     {
                         Stroke = new SolidColorBrush(clr),
-                        Fill = new SolidColorBrush(clr),
+                        Fill = new SolidColorBrush(Colors.Black),//new SolidColorBrush(clr),
                         Width = sz,
                         Height = sz,
-                        Margin = new Thickness(fireflyPoint.X[0] - HalfPointSize, fireflyPoint.X[1] - HalfPointSize, 0, 0)
+                        Margin = new Thickness(fireflyPoint.X[0] - offset, fireflyPoint.X[1] - offset, 0, 0)
                     });
                 }
             }
@@ -372,13 +374,13 @@ namespace FFA_Clustering
         private async Task ClickFlash(Shape line)
         {
             const int AnimationWait = 150;
-            var cb = line.Stroke;
+            var cb = line.Fill;
 
             var da = new ColorAnimation
             {
                 From = Colors.Transparent,
                 To = this.ClickBrush.Color,
-                Duration = new Duration(TimeSpan.FromMilliseconds(AnimationWait*2))
+                Duration = new Duration(TimeSpan.FromMilliseconds(AnimationWait * 2))
             };
             cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
             await Task.Delay(AnimationWait);
@@ -444,7 +446,18 @@ namespace FFA_Clustering
             var obj = new JsonObject
             {
                 Points = this.Algorithm.Points,
-                Fireflies = this.Algorithm.Fireflies
+                Fireflies = this.Algorithm.Fireflies,
+                SumOfSquaredError = this.TextBoxSumOfSquaredError.Text.Equals(string.Empty) ?
+                    -1 :
+                    Convert.ToDouble(this.TextBoxSumOfSquaredError.Text),
+                SilhouetteMethod = this.TextBoxSilhouetteMethod.Text.Equals(string.Empty) ?
+                    -1 :
+                    Convert.ToDouble(this.TextBoxSilhouetteMethod.Text),
+                XieBeniIndex = this.TextBoxXieBeniIndex.Text.Equals(string.Empty) ?
+                    -1 :
+                    Convert.ToDouble(this.TextBoxXieBeniIndex.Text),
+                ClustersNumber = Convert.ToInt32(this.TextBoxClustersNumber.Text),
+                TestRunsNumber = Convert.ToInt32(this.TextBoxRunsNumber.Text)
             };
             var json = new JavaScriptSerializer().Serialize(obj);
             var file = new StreamWriter(fileName);
@@ -476,14 +489,27 @@ namespace FFA_Clustering
             var deserializer = new JavaScriptSerializer();
             var results = deserializer.Deserialize<JsonObject>(json);
             file.Close();
+
             this.ButtonClear.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+
             this.Algorithm.Points = new List<ClusterPoint>(results.Points);
             this.Algorithm.Fireflies = new List<Firefly>(results.Fireflies);
 
-            var firstFirefly = results.Fireflies.FirstOrDefault();
-            this.Algorithm.Dimension = firstFirefly?.Centroids.Count ?? 5;
+            this.Algorithm.Dimension = 2;
 
-            this.TextBoxClustersNumber.Text = this.Algorithm.Dimension.ToString();
+            const double Precision = .0001;
+            if (Math.Abs(results.SumOfSquaredError + 1) > Precision)
+                this.TextBoxSumOfSquaredError.Text = results.SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+
+            if (Math.Abs(results.SilhouetteMethod + 1) > Precision)
+                this.TextBoxSilhouetteMethod.Text = results.SilhouetteMethod.ToString(CultureInfo.InvariantCulture);
+
+            if (Math.Abs(results.XieBeniIndex + 1) > Precision)
+                this.TextBoxXieBeniIndex.Text = results.XieBeniIndex.ToString(CultureInfo.InvariantCulture);
+
+            this.TextBoxClustersNumber.Text = results.ClustersNumber.ToString();
+            this.TextBoxRunsNumber.Text = results.TestRunsNumber.ToString();
+            
             this.Draw();
         }
         #endregion
