@@ -50,6 +50,8 @@ namespace FFA_Clustering
         private int CanvasClicksHandled { get; set; }
 
         private bool AlreadyViolet { get; set; } = true;
+
+        private TestResultsWindow TestResultsWindow { get; set; }
         #endregion
 
         #region Constructors
@@ -370,6 +372,11 @@ namespace FFA_Clustering
                 }
             }
         }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            TestResultsWindow.Close();
+        }
         #endregion
 
         #region JSON
@@ -484,14 +491,14 @@ namespace FFA_Clustering
             if (algorithm.Equals(Properties.Resources.Kmeans))
                 action = async () => { await ButtonKMeansClickTask(ButtonKmeans); };
             else if (algorithm.Equals(Properties.Resources.KmeansPlusPlus))
-                action = async () => { await ButtonKMeansClickTask(ButtonKmeans); };
+                action = async () => { await ButtonKMeansClickTask(ButtonKmeansPlusPlus); };
             else action = async () => { await ButtonRunClickTask(); };
 
             var sse = 0.0;
             var sm = 0.0;
             var xb = 0.0;
             var runsNumber = Convert.ToInt32(TextBoxRunsNumber.Text);
-            for (var i = 0; i < runsNumber; i++)
+            for (var i = 1; i <= runsNumber; i++)
             {
                 LabelInfoRequiredPart = $"Testing {algorithm}\t\tTest #{i}\t\t";
                 await action();
@@ -517,12 +524,13 @@ namespace FFA_Clustering
         private async void ButtonRunTestsClick(object sender, RoutedEventArgs e)
         {
             ClipboardMessage = string.Empty;
-            var testResultsWindow = new TestResultsWindow();
             var a = await GetResult(Properties.Resources.Kmeans);
-            testResultsWindow.ListViewInfoTestResults.Items.Add(a);
-            testResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.KmeansPlusPlus));
-            testResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
-            testResultsWindow.Show();
+            TestResultsWindow = new TestResultsWindow();
+            TestResultsWindow.ListViewInfoTestResults.Items.Clear();
+            TestResultsWindow.ListViewInfoTestResults.Items.Add(a);
+            TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.KmeansPlusPlus));
+            //TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
+            TestResultsWindow.Show();
             LabelInfoRequiredPart = string.Empty;
             LabelInfo.Content = "Test are finished";
             Clipboard.SetText(ClipboardMessage);

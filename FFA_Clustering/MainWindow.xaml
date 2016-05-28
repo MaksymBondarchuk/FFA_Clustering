@@ -4,11 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="FFA Clustering" Height="720" Width="1280" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" WindowState="Maximized" PreviewKeyDown="WindowPreviewKeyDown" Loaded="WindowLoaded">
+        Title="FFA Clustering" Height="720" Width="1280" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" WindowState="Maximized" PreviewKeyDown="WindowPreviewKeyDown" Loaded="WindowLoaded" Closed="Window_Closed">
 
     <Grid Background="White">
         <Canvas x:Name="CanvasMain" Margin="210,35,10,28" MouseUp="CanvasMainMouseUp" Background="#00000000"/>
-        <Menu Height="20" VerticalAlignment="Top">
+        <Menu Height="20" VerticalAlignment="Top" Background="{x:Null}">
             <MenuItem Header="File">
                 <MenuItem x:Name="MenuItemSave" Header="Save" Click="MenuItemSaveClick" IsEnabled="{DynamicResource IsMenuItemSaveEnabled}"/>
                 <MenuItem x:Name="MenuItemOpen" Header="Open" Click="MenuItemOpenClick"/>
