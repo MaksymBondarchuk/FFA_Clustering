@@ -79,6 +79,24 @@ namespace FFA_Clustering.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Drawing points.
+        /// </summary>
+        internal static string DrawingMessage {
+            get {
+                return ResourceManager.GetString("DrawingMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Draw some points or open a file.
+        /// </summary>
+        internal static string InitialMessage {
+            get {
+                return ResourceManager.GetString("InitialMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to K-means.
         /// </summary>
         internal static string Kmeans {
@@ -102,6 +120,15 @@ namespace FFA_Clustering.Properties {
         internal static string ModifiedFireflyAlgorithm {
             get {
                 return ResourceManager.GetString("ModifiedFireflyAlgorithm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ready.
+        /// </summary>
+        internal static string ReadyMessage {
+            get {
+                return ResourceManager.GetString("ReadyMessage", resourceCulture);
             }
         }
     }

@@ -5,23 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="FFA Clustering" Height="720" Width="1280" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" WindowState="Maximized" PreviewKeyDown="WindowPreviewKeyDown" Loaded="WindowLoaded">
-    <Window.Resources>
-
-    </Window.Resources>
 
     <Grid Background="White">
-        <Canvas x:Name="CanvasMain" Margin="210,35,10,34" MouseUp="CanvasMainMouseUp" Background="#00000000"/>
+        <Canvas x:Name="CanvasMain" Margin="210,35,10,28" MouseUp="CanvasMainMouseUp" Background="#00000000"/>
         <Menu Height="20" VerticalAlignment="Top">
             <MenuItem Header="File">
                 <MenuItem x:Name="MenuItemSave" Header="Save" Click="MenuItemSaveClick" IsEnabled="{DynamicResource IsMenuItemSaveEnabled}"/>
                 <MenuItem x:Name="MenuItemOpen" Header="Open" Click="MenuItemOpenClick"/>
             </MenuItem>
         </Menu>
-        <StatusBar Height="23" VerticalAlignment="Bottom" Background="#FF007ACC">
-            <Label x:Name="LabelInfo" Content="Ready" HorizontalAlignment="Center" VerticalAlignment="Top" Width="265" VerticalContentAlignment="Center" Foreground="White" Padding="0"/>
-            <ProgressBar x:Name="ProgressBarInfo" Background="#FF007ACC" BorderBrush="{x:Null}" Height="14" Width="532" Foreground="#FF4CA2DB"/>
+        <StatusBar x:Name="StatusBarMain" Height="23" VerticalAlignment="Bottom" Background="#FF68217A">
+            <Label x:Name="LabelInfo" Content="Draw some points or open a file" HorizontalAlignment="Center" VerticalAlignment="Top" VerticalContentAlignment="Center" Foreground="White" Padding="0" Width="410"/>
+            <ProgressBar x:Name="ProgressBarInfo" BorderBrush="#FF4CA2DB" Foreground="#FF4CA2DB" VerticalAlignment="Bottom" UseLayoutRounding="False" Height="17" Background="{x:Null}" Width="265" HorizontalAlignment="Right" BorderThickness="2,0"/>
         </StatusBar>
-        <TabControl x:Name="TabControlMain" Margin="10,25,0,28" HorizontalAlignment="Left" Width="195">
+        <TabControl x:Name="TabControlMain" Margin="10,25,0,0" HorizontalAlignment="Left" Width="200" SelectionChanged="TabControlMain_SelectionChanged" Height="510" VerticalAlignment="Top">
             <TabItem Header="Test mode">
                 <Grid IsEnabled="{DynamicResource IsMenuItemSaveEnabled}">
                     <TextBox x:Name="TextBoxSilhouetteMethod" HorizontalAlignment="Left" Height="23" Margin="11,81,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="110"/>
@@ -30,12 +27,12 @@
                     <Label Content="Sum of Squared Error" HorizontalAlignment="Left" Margin="10,1,0,0" VerticalAlignment="Top"/>
                     <TextBox x:Name="TextBoxXieBeniIndex" HorizontalAlignment="Left" Height="23" Margin="10,135,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109"/>
                     <Label Content="Xie-Beni index" HorizontalAlignment="Left" Margin="10,109,0,0" VerticalAlignment="Top"/>
-                    <TabControl HorizontalAlignment="Left" Height="142" Margin="10,198,0,0" VerticalAlignment="Top" Width="160">
+                    <TabControl HorizontalAlignment="Left" Height="127" Margin="10,198,0,0" VerticalAlignment="Top" Width="137">
                         <TabItem Header="Run algorithm">
                             <Grid>
-                                <Button x:Name="ButtonMfa" Content="MFA" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRunClick" TabIndex="0"/>
-                                <Button x:Name="ButtonKmeans" Content="K-means" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeansClick"/>
-                                <Button x:Name="ButtonKmeansPlusPlus" Content="K-means++" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeansClick"/>
+                                <Button x:Name="ButtonMfa" Content="MFA" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRunClick" TabIndex="0"/>
+                                <Button x:Name="ButtonKmeans" Content="K-means" HorizontalAlignment="Left" Margin="10,17,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeansClick"/>
+                                <Button x:Name="ButtonKmeansPlusPlus" Content="K-means++" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeansClick"/>
                             </Grid>
                         </TabItem>
                         <TabItem Header="Test">

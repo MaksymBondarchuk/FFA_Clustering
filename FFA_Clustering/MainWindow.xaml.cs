@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,9 +17,6 @@ using Microsoft.Win32;
 
 namespace FFA_Clustering
 {
-    using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -27,7 +26,6 @@ namespace FFA_Clustering
         private const int HalfPointSize = 2;
         private const int IterationDelay = 125;
         private const int ClickDispersion = 15;
-        private const int ClickLineStroke = 10;
         #endregion
 
         #region Private properties
@@ -44,33 +42,36 @@ namespace FFA_Clustering
 
         private List<Color> Clrs { get; } = new List<Color>();
 
+        // ReSharper disable once PossibleNullReferenceException
         private SolidColorBrush ClickBrush { get; set; } = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF007ACC"));
 
-        private int CanvasClicks { get; set; } = 0;
+        private int CanvasClicks { get; set; }
 
-        private int CanvasClicksHandled { get; set; } = 0;
+        private int CanvasClicksHandled { get; set; }
+
+        private bool AlreadyViolet { get; set; } = true;
         #endregion
 
-        #region Constructor
+        #region Constructors
         public MainWindow()
         {
-            this.InitializeComponent();
+            InitializeComponent();
 
             //GroupBoxDrawPoints.Height = 0;
 
-            this.Algorithm = new Algorithm
+            Algorithm = new Algorithm
             {
-                RangeX = (int)this.CanvasMain.ActualWidth,
-                RangeY = (int)this.CanvasMain.ActualHeight,
-                Dimension = 2
+                RangeX = (int)CanvasMain.ActualWidth,
+                RangeY = (int)CanvasMain.ActualHeight
             };
 
             Application.Current.Resources["IsMenuItemSaveEnabled"] = false;
+            ProgressBarInfo.Visibility = Visibility.Hidden;
 
             //OpenFile("C:\\Users\\Max\\Downloads\\InitialSet.json");
 
             for (var i = 0; i < 200; i++)
-                this.Clrs.Add(Color.FromRgb((byte)this.Rand.Next(255), (byte)this.Rand.Next(255), (byte)this.Rand.Next(255)));
+                Clrs.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
         }
 
         private async void WindowLoaded(object sender, RoutedEventArgs e)
@@ -86,6 +87,7 @@ namespace FFA_Clustering
 
             //await this.MouseClick(new Point(300, 300));
             //await Task.Delay(1000);
+            await Task.Delay(0);
         }
         #endregion
 
@@ -100,48 +102,48 @@ namespace FFA_Clustering
         #region Mouse events
         private async void CanvasMainMouseUp(object sender, MouseButtonEventArgs e)
         {
-            await this.MouseClick(Mouse.GetPosition(this.CanvasMain));
+            await MouseClick(Mouse.GetPosition(CanvasMain));
         }
 
         private async Task MouseClick(Point mouseLocation)
         {
-            if (this.TabControlMain.SelectedIndex == 0 ||    // Test mode
-                this.TextBoxDispersion.Text.Equals(string.Empty) ||
-                this.TextBoxPointsPerClick.Text.Equals(string.Empty))
+            if (TabControlMain.SelectedIndex == 0 ||    // Test mode
+                TextBoxDispersion.Text.Equals(string.Empty) ||
+                TextBoxPointsPerClick.Text.Equals(string.Empty))
                 return;
 
-            var dispersion = Convert.ToInt32(this.TextBoxDispersion.Text);
-            var pointsPerClick = Convert.ToInt32(this.TextBoxPointsPerClick.Text);
+            var dispersion = Convert.ToInt32(TextBoxDispersion.Text);
+            var pointsPerClick = Convert.ToInt32(TextBoxPointsPerClick.Text);
 
             #region Test
-            var isChecked = this.CheckBoxShitMode.IsChecked;
+            var isChecked = CheckBoxShitMode.IsChecked;
             if (isChecked != null && (bool)isChecked)
             {
-                var k = Convert.ToInt32(this.TextBoxClustersNumber.Text);
+                var k = Convert.ToInt32(TextBoxClustersNumber.Text);
 
-                if (k - 1 <= this.ClickedTimes)
+                if (k - 1 <= ClickedTimes)
                 {
-                    this.Algorithm.Fireflies.Add(this.ShitEater);
-                    this.Algorithm.FillCentroidPoints(this.Algorithm.Fireflies.First());
-                    this.Algorithm.Fireflies.First().SumOfSquaredError = this.Algorithm.SumOfSquaredError(this.Algorithm.Fireflies.First());
-                    this.Draw();
+                    Algorithm.Fireflies.Add(ShitEater);
+                    Algorithm.FillCentroidPoints(Algorithm.Fireflies.First());
+                    Algorithm.Fireflies.First().SumOfSquaredError = Algorithm.SumOfSquaredError(Algorithm.Fireflies.First());
+                    Draw();
                     return;
                 }
 
                 var cp = new ClusterPoint();
                 cp.X.Add(mouseLocation.X);
                 cp.X.Add(mouseLocation.Y);
-                this.ShitEater.Centroids.Add(cp);
-                this.ShitEater.CentroidPoints.Add(new List<int>());
+                ShitEater.Centroids.Add(cp);
+                ShitEater.CentroidPoints.Add(new List<int>());
 
-                this.ClickedTimes++;
+                ClickedTimes++;
                 return;
             }
             #endregion
 
             #region Click animation
 
-            var newBrush = new SolidColorBrush(this.ClickBrush.Color);
+            var newBrush = new SolidColorBrush(ClickBrush.Color);
 
             var circle = new Ellipse
             {
@@ -149,42 +151,47 @@ namespace FFA_Clustering
                 Width = ClickDispersion * 2,
                 StrokeThickness = 2,
                 Stroke = new SolidColorBrush(Colors.Transparent),
-                Fill = this.ClickBrush,
+                Fill = ClickBrush,
                 Margin = new Thickness(mouseLocation.X - ClickDispersion, mouseLocation.Y - ClickDispersion, 0, 0)
             };
 
-            this.CanvasMain.Children.Add(circle);
-            await this.ClickFlash(circle);
+            CanvasMain.Children.Add(circle);
+            await ClickFlash(circle);
 
-            this.CanvasMain.Children.RemoveAt(this.CanvasMain.Children.Count - 1);
-            this.ClickBrush = newBrush;
+            CanvasMain.Children.RemoveAt(CanvasMain.Children.Count - 1);
+            ClickBrush = newBrush;
             #endregion
 
-            if (mouseLocation.X < dispersion * .5 || this.CanvasMain.Width - dispersion * .5 < mouseLocation.X ||
-                mouseLocation.Y < dispersion * .5 || this.CanvasMain.Height - dispersion * .5 < mouseLocation.Y)
+            if (mouseLocation.X < dispersion * .5 || CanvasMain.Width - dispersion * .5 < mouseLocation.X ||
+                mouseLocation.Y < dispersion * .5 || CanvasMain.Height - dispersion * .5 < mouseLocation.Y)
                 return;
 
             #region Draw points
 
-            this.CanvasClicks++;
+            CanvasClicks++;
+            if (AlreadyViolet)
+                LabelInfo.Content = "Drawing points";
+            else
+                await ProgressBarAnimation(false, Properties.Resources.DrawingMessage);
+            AlreadyViolet = true;
             for (var i = 0; i < pointsPerClick; i++)
             {
                 int x, y;
-                if (this.RadioButtonDispersionAsSquare.IsChecked != null && this.RadioButtonDispersionAsSquare.IsChecked.Value)
+                if (RadioButtonDispersionAsSquare.IsChecked != null && RadioButtonDispersionAsSquare.IsChecked.Value)
                 {
-                    x = this.Rand.Next((int)(mouseLocation.X - dispersion * .5), (int)(mouseLocation.X + dispersion * .5));
-                    y = this.Rand.Next((int)(mouseLocation.Y - dispersion * .5), (int)(mouseLocation.Y + dispersion * .5));
+                    x = Rand.Next((int)(mouseLocation.X - dispersion * .5), (int)(mouseLocation.X + dispersion * .5));
+                    y = Rand.Next((int)(mouseLocation.Y - dispersion * .5), (int)(mouseLocation.Y + dispersion * .5));
                 }
                 else
                 {
-                    var radius = this.Rand.NextDouble() * dispersion * .5;
-                    var angle = this.Rand.NextDouble() * 2 * Math.PI;
+                    var radius = Rand.NextDouble() * dispersion * .5;
+                    var angle = Rand.NextDouble() * 2 * Math.PI;
 
                     x = (int)(mouseLocation.X + radius * Math.Cos(angle));
                     y = (int)(mouseLocation.Y + radius * Math.Sin(angle));
                 }
 
-                this.CanvasMain.Children.Add(new Rectangle
+                CanvasMain.Children.Add(new Rectangle
                 {
                     Stroke = new SolidColorBrush(Colors.Red),
                     Fill = new SolidColorBrush(Colors.Red),
@@ -196,144 +203,140 @@ namespace FFA_Clustering
                 var p = new ClusterPoint();
                 p.X.Add(x);
                 p.X.Add(y);
-                this.Algorithm.Points.Add(p);
+                Algorithm.Points.Add(p);
                 await Task.Delay(1);
             }
-            this.CanvasClicksHandled++;
-            Application.Current.Resources["IsMenuItemSaveEnabled"] = this.CanvasClicks == this.CanvasClicksHandled;
+            CanvasClicksHandled++;
+            if (CanvasClicks == CanvasClicksHandled)
+            {
+                await ProgressBarAnimation(true, Properties.Resources.ReadyMessage);
+                AlreadyViolet = false;
+            }
+
             #endregion
         }
         #endregion
 
         #region Button events
-        private void ButtonClearClick(object sender, RoutedEventArgs e)
+        private async void ButtonClearClick(object sender, RoutedEventArgs e)
         {
-            this.Algorithm.Points.Clear();
-            this.CanvasMain.Children.Clear();
+            Algorithm.Points.Clear();
+            CanvasMain.Children.Clear();
 
-            Application.Current.Resources["IsMenuItemSaveEnabled"] = false;
-            this.TextBoxSilhouetteMethod.Text = string.Empty;
+            TextBoxSumOfSquaredError.Text = string.Empty;
+            TextBoxSilhouetteMethod.Text = string.Empty;
+            TextBoxXieBeniIndex.Text = string.Empty;
+
+            await ProgressBarAnimation(false, Properties.Resources.InitialMessage);
+            AlreadyViolet = true;
         }
 
         private async void ButtonRunClick(object sender, RoutedEventArgs e)
         {
-            await this.ButtonRunClickTask();
+            await ButtonRunClickTask();
         }
 
         private async Task ButtonRunClickTask()
         {
-            this.IsRunClicked = true;
+            IsRunClicked = true;
 
-            this.Algorithm.RangeX = (int)this.CanvasMain.ActualWidth;
-            this.Algorithm.RangeY = (int)this.CanvasMain.ActualHeight;
-            this.Algorithm.Dimension = 2;
+            Algorithm.RangeX = (int)CanvasMain.ActualWidth;
+            Algorithm.RangeY = (int)CanvasMain.ActualHeight;
 
-            var clustersNumber = Convert.ToInt32(this.TextBoxClustersNumber.Text);
-            this.Algorithm.Initialization(Convert.ToInt32(this.TextBoxFirefliesNumber.Text), clustersNumber);
+            var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
+            Algorithm.Initialization(Convert.ToInt32(TextBoxFirefliesNumber.Text), clustersNumber);
 
             for (var iter = 1; iter <= Algorithm.MaximumGenerations; iter++)
             {
-                await this.Algorithm.Iteration(iter);
+                await Algorithm.Iteration(iter);
 
-                //TextBoxSumOfSquaredError.Text = $"{ff.SumOfSquaredError,-18:0.}";
-                //TextBoxSilhouetteMethod.Text = $"{this.Algorithm.SilhouetteMethod(ff),-18:0.0000000000}";
-                //TextBoxXieBeniIndex.Text = $"{this.Algorithm.XieBeniIndex(ff),-18:0.0000000000}";
+                Algorithm.UpdatePoints(Algorithm.Fireflies.First());
 
-                this.Algorithm.UpdatePoints(this.Algorithm.Fireflies.First());
-                //CanvasMain.Children.Clear();
-
-                this.Draw();
+                Draw();
 
                 if (iter == Algorithm.MaximumGenerations - 1 ||
-                    this.Algorithm.MfaCanStop)
+                    Algorithm.MfaCanStop)
                 {
-                    this.IsRunClicked = false;
-                    this.LabelInfo.Content = "MFA finished";
-                    await this.CanvasFlash();
+                    IsRunClicked = false;
+                    LabelInfo.Content = "MFA finished";
+                    await CanvasFlash();
                     return;
                 }
 
-                this.ProgressBarInfo.Value = iter * 100 / (double)Algorithm.MaximumGenerations;
-                this.LabelInfo.Content = $"{this.LabelInfoRequiredPart}Iteration #{iter}";
+                ProgressBarInfo.Value = iter * 100 / (double)Algorithm.MaximumGenerations;
+                LabelInfo.Content = $"{LabelInfoRequiredPart}Iteration #{iter}";
                 await Task.Delay(IterationDelay);
             }
+            ProgressBarInfo.Value = 100;
         }
 
         private async void ButtonKMeansClick(object sender, RoutedEventArgs e)
         {
-            await this.ButtonKMeansClickTask(sender);
+            await ButtonKMeansClickTask(sender);
         }
 
         private async Task ButtonKMeansClickTask(object sender)
         {
-            this.IsRunClicked = false;
+            IsRunClicked = false;
 
-            this.Algorithm.RangeX = (int)this.CanvasMain.ActualWidth;
-            this.Algorithm.RangeY = (int)this.CanvasMain.ActualHeight;
-            this.Algorithm.Dimension = 2;
+            Algorithm.RangeX = (int)CanvasMain.ActualWidth;
+            Algorithm.RangeY = (int)CanvasMain.ActualHeight;
 
-            var clustersNumber = Convert.ToInt32(this.TextBoxClustersNumber.Text);
+            var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
             var button = sender as Button;
-            if (Equals(button, this.ButtonKmeans))
-                this.Algorithm.InitializationKMeans(clustersNumber);
+            if (Equals(button, ButtonKmeans))
+                Algorithm.InitializationKMeans(clustersNumber);
             else
-                this.Algorithm.InitializationKMeansPlusPlus(clustersNumber);
+                Algorithm.InitializationKMeansPlusPlus(clustersNumber);
 
-            for (var iter = 0; iter < Algorithm.MaximumGenerations; iter++)
+            var iter = 0;
+            while (!Algorithm.KMeansCanStop)
             {
-                await this.Algorithm.IterationKMeans();
+                await Algorithm.IterationKMeans();
 
-                //var ff = this.Algorithm.Fireflies.First();
-                //this.TextBoxSumOfSquaredError.Text = $"{ff.SumOfSquaredError,-18:0.}";
-                //this.TextBoxSilhouetteMethod.Text = $"{this.Algorithm.SilhouetteMethod(ff),-18:0.0000000000}";
-                //this.TextBoxXieBeniIndex.Text = $"{this.Algorithm.XieBeniIndex(ff),-18:0.0000000000}";
-                //this.Algorithm.UpdatePoints(ff);
-                //this.CanvasMain.Children.Clear();
-                this.Draw();
-                this.LabelInfo.Content = $"{this.LabelInfoRequiredPart}Iteration #{iter}";
+                Draw();
+                LabelInfo.Content = $"{LabelInfoRequiredPart}Iteration #{iter}";
+                iter++;
+                ProgressBarInfo.Value = iter * 5;
                 await Task.Delay(IterationDelay);
-
-                if (!this.Algorithm.KMeansCanStop) continue;
-                if (Equals(button, this.ButtonKmeans))
-                    this.LabelInfo.Content = $"{this.LabelInfoRequiredPart}K-means finished";
-                else
-                    this.LabelInfo.Content = $"{this.LabelInfoRequiredPart}K-means++ finished";
-                await this.CanvasFlash();
-
-                return;
             }
+
+            LabelInfo.Content = Equals(button, ButtonKmeans)
+                    ? $"{LabelInfoRequiredPart}K-means finished"
+                    : $"{LabelInfoRequiredPart}K-means++ finished";
+            ProgressBarInfo.Value = 100;
+            await CanvasFlash();
         }
 
         private void WindowPreviewKeyDown(object sender, KeyEventArgs e)
         {
             if ((Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) &&
                 Keyboard.IsKeyDown(Key.S))
-                this.MenuItemSave.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+                MenuItemSave.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
 
             if ((Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) &&
                 Keyboard.IsKeyDown(Key.O))
-                this.MenuItemOpen.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+                MenuItemOpen.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
         }
-
         #endregion
 
         #region Additional methods
         private void Draw()
         {
-            if (this.Algorithm.Fireflies.Count != 0)
+            if (Algorithm.Fireflies.Count != 0)
             {
-                var ff = this.Algorithm.Fireflies.First();
-                this.TextBoxSumOfSquaredError.Text = $"{ff.SumOfSquaredError}";
-                this.TextBoxSilhouetteMethod.Text = $"{this.Algorithm.SilhouetteMethod(ff),-10:0.00000000}";
-                this.TextBoxXieBeniIndex.Text = $"{this.Algorithm.XieBeniIndex(ff),-10:0.00000000}";
-                this.Algorithm.UpdatePoints(ff);
-                this.CanvasMain.Children.Clear();
+                var ff = Algorithm.Fireflies.First();
+                TextBoxSumOfSquaredError.Text = $"{ff.SumOfSquaredError}";
+                TextBoxSilhouetteMethod.Text = $"{Algorithm.SilhouetteMethod(ff),-10:0.00000000}";
+                TextBoxXieBeniIndex.Text = $"{Algorithm.XieBeniIndex(ff),-10:0.00000000}";
+                Algorithm.UpdatePoints(ff);
+                CanvasMain.Children.Clear();
             }
 
-            foreach (var point in this.Algorithm.Points)
+            foreach (var point in Algorithm.Points)
             {
-                var pointColor = !this.IsRunClicked && point.BelongsToCentroid != -1 ? this.Clrs[point.BelongsToCentroid] : Colors.Red;
-                this.CanvasMain.Children.Add(new Rectangle
+                var pointColor = !IsRunClicked && point.BelongsToCentroid != -1 ? Clrs[point.BelongsToCentroid] : Colors.Red;
+                CanvasMain.Children.Add(new Rectangle
                 {
                     Stroke = new SolidColorBrush(pointColor),
                     Fill = new SolidColorBrush(pointColor),
@@ -343,82 +346,28 @@ namespace FFA_Clustering
                 });
             }
 
-            for (var ffI = 0; ffI < this.Algorithm.Fireflies.Count; ffI++)
+            for (var ffI = 0; ffI < Algorithm.Fireflies.Count; ffI++)
             {
-                if (!this.IsRunClicked && ffI != 0)
-                    return;
-
-                var offset = (this.IsRunClicked && ffI == 0 ? 8 * HalfPointSize : 4 * HalfPointSize) * .5;
+                var offset = (IsRunClicked && ffI == 0 ? 8 * HalfPointSize : 4 * HalfPointSize) * .5;
                 var sz = 2 * offset;
 
-                var firefly = this.Algorithm.Fireflies[ffI];
+                var firefly = Algorithm.Fireflies[ffI];
                 for (var j = 0; j < firefly.Centroids.Count; j++)
                 //foreach (var fireflyPoint in firefly.Centroids)
                 {
                     var fireflyPoint = firefly.Centroids[j];
                     //if (IsRunClicked)
-                    var clr = this.IsRunClicked ? this.Clrs[ffI] : this.Clrs[j];
+                    var clr = IsRunClicked ? Clrs[ffI] : Clrs[j];
                     //var sz = 4 * HalfPointSize;
-                    this.CanvasMain.Children.Add(new Rectangle
+                    CanvasMain.Children.Add(new Rectangle
                     {
                         Stroke = new SolidColorBrush(clr),
-                        Fill = new SolidColorBrush(Colors.Black),//new SolidColorBrush(clr),
+                        Fill = new SolidColorBrush(clr),//new SolidColorBrush(Colors.Black),
                         Width = sz,
                         Height = sz,
                         Margin = new Thickness(fireflyPoint.X[0] - offset, fireflyPoint.X[1] - offset, 0, 0)
                     });
                 }
-            }
-        }
-
-        private async Task ClickFlash(Shape line)
-        {
-            const int AnimationWait = 150;
-            var cb = line.Fill;
-
-            var da = new ColorAnimation
-            {
-                From = Colors.Transparent,
-                To = this.ClickBrush.Color,
-                Duration = new Duration(TimeSpan.FromMilliseconds(AnimationWait * 2))
-            };
-            cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
-            await Task.Delay(AnimationWait);
-            var da1 = new ColorAnimation
-            {
-                From = this.ClickBrush.Color,
-                To = Colors.Transparent,
-                Duration = new Duration(TimeSpan.FromMilliseconds(AnimationWait))
-            };
-            cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
-        }
-
-        private async Task CanvasFlash()
-        {
-            const int AnimationWait = 150;
-            var previousColor = new SolidColorBrush(((SolidColorBrush)this.CanvasMain.Background).Color).Color;
-            var cb = this.CanvasMain.Background;
-            var convertFromString = ColorConverter.ConvertFromString("#FF007ACC");
-            if (convertFromString != null)
-            {
-                var da = new ColorAnimation
-                {
-                    From = previousColor,
-                    To = (Color)convertFromString,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(AnimationWait))
-                };
-                cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
-            }
-            await Task.Delay(AnimationWait);
-            if (convertFromString != null)
-            {
-                var da1 = new ColorAnimation
-                {
-                    From = (Color)convertFromString,
-                    To = previousColor,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(AnimationWait))
-                };
-                cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
             }
         }
         #endregion
@@ -434,7 +383,7 @@ namespace FFA_Clustering
 
             if (dlg.ShowDialog() == true)
             {
-                this.SaveToFile(dlg.FileName);
+                SaveToFile(dlg.FileName);
             }
         }
 
@@ -445,19 +394,19 @@ namespace FFA_Clustering
 
             var obj = new JsonObject
             {
-                Points = this.Algorithm.Points,
-                Fireflies = this.Algorithm.Fireflies,
-                SumOfSquaredError = this.TextBoxSumOfSquaredError.Text.Equals(string.Empty) ?
+                Points = Algorithm.Points,
+                Fireflies = Algorithm.Fireflies,
+                SumOfSquaredError = TextBoxSumOfSquaredError.Text.Equals(string.Empty) ?
                     -1 :
-                    Convert.ToDouble(this.TextBoxSumOfSquaredError.Text),
-                SilhouetteMethod = this.TextBoxSilhouetteMethod.Text.Equals(string.Empty) ?
+                    Convert.ToDouble(TextBoxSumOfSquaredError.Text),
+                SilhouetteMethod = TextBoxSilhouetteMethod.Text.Equals(string.Empty) ?
                     -1 :
-                    Convert.ToDouble(this.TextBoxSilhouetteMethod.Text),
-                XieBeniIndex = this.TextBoxXieBeniIndex.Text.Equals(string.Empty) ?
+                    Convert.ToDouble(TextBoxSilhouetteMethod.Text),
+                XieBeniIndex = TextBoxXieBeniIndex.Text.Equals(string.Empty) ?
                     -1 :
-                    Convert.ToDouble(this.TextBoxXieBeniIndex.Text),
-                ClustersNumber = Convert.ToInt32(this.TextBoxClustersNumber.Text),
-                TestRunsNumber = Convert.ToInt32(this.TextBoxRunsNumber.Text)
+                    Convert.ToDouble(TextBoxXieBeniIndex.Text),
+                ClustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text),
+                TestRunsNumber = Convert.ToInt32(TextBoxRunsNumber.Text)
             };
             var json = new JavaScriptSerializer().Serialize(obj);
             var file = new StreamWriter(fileName);
@@ -475,11 +424,11 @@ namespace FFA_Clustering
 
             if (dlg.ShowDialog() == true)
             {
-                this.OpenFile(dlg.FileName);
+                OpenFile(dlg.FileName);
             }
         }
 
-        private void OpenFile(string fileName)
+        private async void OpenFile(string fileName)
         {
             if (fileName.Equals(string.Empty))
                 return;
@@ -490,32 +439,31 @@ namespace FFA_Clustering
             var results = deserializer.Deserialize<JsonObject>(json);
             file.Close();
 
-            this.ButtonClear.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+            ButtonClear.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
 
-            this.Algorithm.Points = new List<ClusterPoint>(results.Points);
-            this.Algorithm.Fireflies = new List<Firefly>(results.Fireflies);
+            Algorithm.Points = new List<ClusterPoint>(results.Points);
+            Algorithm.Fireflies = new List<Firefly>(results.Fireflies);
 
-            this.Algorithm.Dimension = 2;
+            const double precision = .0001;
+            if (Math.Abs(results.SumOfSquaredError + 1) > precision)
+                TextBoxSumOfSquaredError.Text = results.SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
 
-            const double Precision = .0001;
-            if (Math.Abs(results.SumOfSquaredError + 1) > Precision)
-                this.TextBoxSumOfSquaredError.Text = results.SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+            if (Math.Abs(results.SilhouetteMethod + 1) > precision)
+                TextBoxSilhouetteMethod.Text = results.SilhouetteMethod.ToString(CultureInfo.InvariantCulture);
 
-            if (Math.Abs(results.SilhouetteMethod + 1) > Precision)
-                this.TextBoxSilhouetteMethod.Text = results.SilhouetteMethod.ToString(CultureInfo.InvariantCulture);
+            if (Math.Abs(results.XieBeniIndex + 1) > precision)
+                TextBoxXieBeniIndex.Text = results.XieBeniIndex.ToString(CultureInfo.InvariantCulture);
 
-            if (Math.Abs(results.XieBeniIndex + 1) > Precision)
-                this.TextBoxXieBeniIndex.Text = results.XieBeniIndex.ToString(CultureInfo.InvariantCulture);
+            TextBoxClustersNumber.Text = results.ClustersNumber.ToString();
+            TextBoxRunsNumber.Text = results.TestRunsNumber.ToString();
 
-            this.TextBoxClustersNumber.Text = results.ClustersNumber.ToString();
-            this.TextBoxRunsNumber.Text = results.TestRunsNumber.ToString();
-            
-            this.Draw();
+            Draw();
+            if (Algorithm.Points.Count != 0)
+                await ProgressBarAnimation(true, Properties.Resources.ReadyMessage);
         }
         #endregion
 
         #region Tests
-
         [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
         private class TestListViewItem
         {
@@ -534,28 +482,29 @@ namespace FFA_Clustering
         {
             Func<Task> action;
             if (algorithm.Equals(Properties.Resources.Kmeans))
-                action = async () => { await this.ButtonKMeansClickTask(this.ButtonKmeans); };
+                action = async () => { await ButtonKMeansClickTask(ButtonKmeans); };
             else if (algorithm.Equals(Properties.Resources.KmeansPlusPlus))
-                action = async () => { await this.ButtonKMeansClickTask(this.ButtonKmeans); };
-            else action = async () => { await this.ButtonRunClickTask(); };
+                action = async () => { await ButtonKMeansClickTask(ButtonKmeans); };
+            else action = async () => { await ButtonRunClickTask(); };
 
             var sse = 0.0;
             var sm = 0.0;
             var xb = 0.0;
-            var runsNumber = Convert.ToInt32(this.TextBoxRunsNumber.Text);
+            var runsNumber = Convert.ToInt32(TextBoxRunsNumber.Text);
             for (var i = 0; i < runsNumber; i++)
             {
-                this.LabelInfoRequiredPart = $"Testing {algorithm}. Test #{i}: ";
+                LabelInfoRequiredPart = $"Testing {algorithm}\t\tTest #{i}\t\t";
                 await action();
-                sse += Convert.ToDouble(this.TextBoxSumOfSquaredError.Text);
-                sm += Convert.ToDouble(this.TextBoxSilhouetteMethod.Text);
-                xb += Convert.ToDouble(this.TextBoxXieBeniIndex.Text);
+                sse += Convert.ToDouble(TextBoxSumOfSquaredError.Text);
+                sm += Convert.ToDouble(TextBoxSilhouetteMethod.Text);
+                xb += Convert.ToDouble(TextBoxXieBeniIndex.Text);
+                await Task.Delay(500);
             }
 
             var sseText = $"{sse / runsNumber,20}";
             var smText = $"{sm / runsNumber,-20:0.0000000000}";
             var xbText = $"{xb / runsNumber,-20:0.0000000000}";
-            this.ClipboardMessage += $"{algorithm};{sseText};{smText};{xbText}";
+            ClipboardMessage += $"{algorithm};{sseText};{smText};{xbText}";
             return new TestListViewItem
             {
                 Algorithm = algorithm,
@@ -567,18 +516,140 @@ namespace FFA_Clustering
 
         private async void ButtonRunTestsClick(object sender, RoutedEventArgs e)
         {
-            this.ClipboardMessage = string.Empty;
+            ClipboardMessage = string.Empty;
             var testResultsWindow = new TestResultsWindow();
-            var a = await this.GetResult(Properties.Resources.Kmeans);
+            var a = await GetResult(Properties.Resources.Kmeans);
             testResultsWindow.ListViewInfoTestResults.Items.Add(a);
-            testResultsWindow.ListViewInfoTestResults.Items.Add(await this.GetResult(Properties.Resources.KmeansPlusPlus));
-            testResultsWindow.ListViewInfoTestResults.Items.Add(await this.GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
+            testResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.KmeansPlusPlus));
+            testResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
             testResultsWindow.Show();
-            this.LabelInfoRequiredPart = string.Empty;
-            this.LabelInfo.Content = "Test are finished";
-            Clipboard.SetText(this.ClipboardMessage);
+            LabelInfoRequiredPart = string.Empty;
+            LabelInfo.Content = "Test are finished";
+            Clipboard.SetText(ClipboardMessage);
+        }
+        #endregion
+
+        #region Animation
+        private void TabControlMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int from;
+            int to;
+            if (TabControlMain.SelectedIndex == 0)
+            {
+                from = 260;
+                to = 510;
+            }
+            else
+            {
+                from = 510;
+                to = 260;
+            }
+
+            var da = new DoubleAnimation
+            {
+                From = from,
+                To = to,
+                Duration = new Duration(TimeSpan.FromMilliseconds(250))
+            };
+            TabControlMain.BeginAnimation(HeightProperty, da);
         }
 
+        private async Task ClickFlash(Shape line)
+        {
+            const int animationWait = 150;
+            var cb = line.Fill;
+
+            var da = new ColorAnimation
+            {
+                From = Colors.Transparent,
+                To = ClickBrush.Color,
+                Duration = new Duration(TimeSpan.FromMilliseconds(animationWait * 2))
+            };
+            cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
+            await Task.Delay(animationWait);
+            var da1 = new ColorAnimation
+            {
+                From = ClickBrush.Color,
+                To = Colors.Transparent,
+                Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+            };
+            cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
+        }
+
+        private async Task CanvasFlash()
+        {
+            const int animationWait = 150;
+            var previousColor = new SolidColorBrush(((SolidColorBrush)CanvasMain.Background).Color).Color;
+            var cb = CanvasMain.Background;
+            var convertFromString = ColorConverter.ConvertFromString("#FF007ACC");
+            if (convertFromString != null)
+            {
+                var da = new ColorAnimation
+                {
+                    From = previousColor,
+                    To = (Color)convertFromString,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+                };
+                cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
+            }
+            await Task.Delay(animationWait);
+            if (convertFromString != null)
+            {
+                var da1 = new ColorAnimation
+                {
+                    From = (Color)convertFromString,
+                    To = previousColor,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+                };
+                cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
+            }
+        }
+
+        /// <summary>
+        /// Changes color of status bar
+        /// </summary>
+        /// <param name="fillOrClear">True to make blue</param>
+        /// <param name="message">Text to put on LabelInfo</param>
+        /// <returns></returns>
+        [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
+        private async Task ProgressBarAnimation(bool fillOrClear, string message)
+        {
+            Color newColorBrush;
+            Color oldColorBrush;
+            var blue = (Color) ColorConverter.ConvertFromString("#FF007ACC");
+            var violet = (Color) ColorConverter.ConvertFromString("#FF68217A");
+
+            if (fillOrClear)
+            {
+                ProgressBarInfo.Visibility = Visibility.Visible;
+                Application.Current.Resources["IsMenuItemSaveEnabled"] = CanvasClicks == CanvasClicksHandled;
+                LabelInfo.Content = "Ready";
+
+                newColorBrush = blue;
+                oldColorBrush = violet;
+            }
+            else
+            {
+                Application.Current.Resources["IsMenuItemSaveEnabled"] = false;
+                LabelInfo.Content = Properties.Resources.InitialMessage;
+                ProgressBarInfo.Visibility = Visibility.Hidden;
+
+                newColorBrush = violet;
+                oldColorBrush = blue;
+            }
+
+            const int animationWait = 300;
+            var ap = StatusBarMain.Background;
+            var da = new ColorAnimation
+            {
+                From = oldColorBrush,
+                To = newColorBrush,
+                Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+            };
+            ap.BeginAnimation(SolidColorBrush.ColorProperty, da);
+            LabelInfo.Content = message;
+            await Task.Delay(0);
+        }
         #endregion
     }
 }

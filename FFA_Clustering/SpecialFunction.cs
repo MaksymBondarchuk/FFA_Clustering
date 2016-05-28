@@ -1,4 +1,5 @@
 using System;
+
 /*
 	**************************************************************************
 	**
@@ -188,7 +189,7 @@ public class SpecialFunction
 		if (a < 0.0) a = Math.Abs(x);
 		a = Math.Exp(a);
 		if (x < 0.0) return -0.5*(a - 1/a);
-		else return 0.5*(a - 1/a);
+	    return 0.5*(a - 1/a);
 	}
 
 		
@@ -205,7 +206,7 @@ public class SpecialFunction
 		if (a < 0.0) a = Math.Abs(x);
 		a = Math.Exp(2.0*a);
 		if (x < 0.0) return -(1.0 - 2.0/(a + 1.0));
-		else return (1.0 - 2.0/(a + 1.0));
+	    return (1.0 - 2.0/(a + 1.0));
 	}
 
 		
@@ -315,22 +316,19 @@ public class SpecialFunction
 				+ y*(99447.43394 + y*(376.9991397 + y*1.0))));
 			return ans1/ans2;
 		}
-		else
-		{
-			double z = 8.0/ax;
-			double xx = ax - 2.356194491;
-			y = z*z;
+	    double z = 8.0/ax;
+	    double xx = ax - 2.356194491;
+	    y = z*z;
 
-			ans1 = 1.0 + y*(0.183105e-2 + y*(-0.3516396496e-4
-				+ y*(0.2457520174e-5 + y*(-0.240337019e-6))));
-			ans2 = 0.04687499995 + y*(-0.2002690873e-3
-				+ y*(0.8449199096e-5 + y*(-0.88228987e-6
-				+ y*0.105787412e-6)));
-			double ans = Math.Sqrt(0.636619772/ax)*
-				(Math.Cos(xx)*ans1 - z*Math.Sin(xx)*ans2);
-			if (x < 0.0) ans = -ans;
-			return ans;
-		}
+	    ans1 = 1.0 + y*(0.183105e-2 + y*(-0.3516396496e-4
+	                                     + y*(0.2457520174e-5 + y*(-0.240337019e-6))));
+	    ans2 = 0.04687499995 + y*(-0.2002690873e-3
+	                              + y*(0.8449199096e-5 + y*(-0.88228987e-6
+	                                                        + y*0.105787412e-6)));
+	    double ans = Math.Sqrt(0.636619772/ax)*
+	                 (Math.Cos(xx)*ans1 - z*Math.Sin(xx)*ans2);
+	    if (x < 0.0) ans = -ans;
+	    return ans;
 	}
 
 		
@@ -355,46 +353,46 @@ public class SpecialFunction
 
 		ax = Math.Abs(x);
 		if (ax == 0.0) return 0.0;
-		else if (ax > (double) n)
-		{
-			tox = 2.0/ax;
-			bjm = j0(ax);
-			bj = j1(ax);
-			for (j = 1; j < n; j++)
-			{
-				bjp = j*tox*bj - bjm;
-				bjm = bj;
-				bj = bjp;
-			}
-			ans = bj;
-		}
-		else
-		{
-			tox = 2.0/ax;
-			m = 2*((n + (int) Math.Sqrt(ACC*n))/2);
-			jsum = false;
-			bjp = ans = sum = 0.0;
-			bj = 1.0;
-			for (j = m; j > 0; j--)
-			{
-				bjm = j*tox*bj - bjp;
-				bjp = bj;
-				bj = bjm;
-				if (Math.Abs(bj) > BIGNO)
-				{
-					bj *= BIGNI;
-					bjp *= BIGNI;
-					ans *= BIGNI;
-					sum *= BIGNI;
-				}
-				if (jsum) sum += bj;
-				jsum = !jsum;
-				if (j == n) ans = bjp;
-			}
-			sum = 2.0*sum - bj;
-			ans /= sum;
-		}
-		return x < 0.0 && n%2 == 1 ? -ans : ans;
+	    if (ax > n)
+	    {
+	        tox = 2.0/ax;
+	        bjm = j0(ax);
+	        bj = j1(ax);
+	        for (j = 1; j < n; j++)
+	        {
+	            bjp = j*tox*bj - bjm;
+	            bjm = bj;
+	            bj = bjp;
+	        }
+	        ans = bj;
+	    }
+	    else
+	    {
+	        tox = 2.0/ax;
+	        m = 2*((n + (int) Math.Sqrt(ACC*n))/2);
+	        jsum = false;
+	        bjp = ans = sum = 0.0;
+	        bj = 1.0;
+	        for (j = m; j > 0; j--)
+	        {
+	            bjm = j*tox*bj - bjp;
+	            bjp = bj;
+	            bj = bjm;
+	            if (Math.Abs(bj) > BIGNO)
+	            {
+	                bj *= BIGNI;
+	                bjp *= BIGNI;
+	                ans *= BIGNI;
+	                sum *= BIGNI;
+	            }
+	            if (jsum) sum += bj;
+	            jsum = !jsum;
+	            if (j == n) ans = bjp;
+	        }
+	        sum = 2.0*sum - bj;
+	        ans /= sum;
+	    }
+	    return x < 0.0 && n%2 == 1 ? -ans : ans;
 	}
 
 		
@@ -501,8 +499,8 @@ public class SpecialFunction
 	public static double fac(double x)
 	{
 		double d = Math.Abs(x);
-		if (Math.Floor(d) == d) return (double) fac((int) x);
-		else return gamma(x + 1.0);
+		if (Math.Floor(d) == d) return fac((int) x);
+	    return gamma(x + 1.0);
 	}
 
 		
@@ -521,7 +519,7 @@ public class SpecialFunction
 			d *= i--;
 		}
 		if (j < 0) return -d;
-		else return d;
+	    return d;
 	}
 
 		
@@ -558,7 +556,7 @@ public class SpecialFunction
 
 		if (q > 33.0)
 		{
-			if (x < 0.0)
+		    if (x < 0.0)
 			{
 				p = Math.Floor(q);
 				if (p == q) throw new ArithmeticException("gamma: overflow");
@@ -576,13 +574,10 @@ public class SpecialFunction
 
 				return -z;
 			}
-			else
-			{
-				return stirf(x);
-			}
+		    return stirf(x);
 		}
 
-		z = 1.0;
+	    z = 1.0;
 		while (x >= 3.0)
 		{
 			x -= 1.0;
@@ -595,11 +590,11 @@ public class SpecialFunction
 			{
 				throw new ArithmeticException("gamma: singular");
 			}
-			else if (x > -1.0E-9)
-			{
-				return (z/((1.0 + 0.5772156649015329*x)*x));
-			}
-			z /= x;
+		    if (x > -1.0E-9)
+		    {
+		        return (z/((1.0 + 0.5772156649015329*x)*x));
+		    }
+		    z /= x;
 			x += 1.0;
 		}
 
@@ -609,11 +604,11 @@ public class SpecialFunction
 			{
 				throw new ArithmeticException("gamma: singular");
 			}
-			else if (x < 1.0E-9)
-			{
-				return (z/((1.0 + 0.5772156649015329*x)*x));
-			}
-			z /= x;
+		    if (x < 1.0E-9)
+		    {
+		        return (z/((1.0 + 0.5772156649015329*x)*x));
+		    }
+		    z /= x;
 			x += 1.0;
 		}
 
@@ -639,7 +634,7 @@ public class SpecialFunction
 							-2.29549961613378126380E-4,
 							-2.68132617805781232825E-3,
 							3.47222221605458667310E-3,
-							8.33333333333482257126E-2,
+							8.33333333333482257126E-2
 		};
 		double MAXSTIR = 143.01608;
 
@@ -818,7 +813,7 @@ public class SpecialFunction
 	{
 		if (k < 0 || x < 0) return 0.0;
 
-		return igamc((double) (k + 1), x);
+		return igamc(k + 1, x);
 	}
 
 		
@@ -832,7 +827,7 @@ public class SpecialFunction
 	{
 		if (k < 0 || x < 0) return 0.0;
 
-		return igam((double) (k + 1), x);
+		return igam(k + 1, x);
 	}
 
 		
@@ -918,11 +913,11 @@ public class SpecialFunction
 
 		if (z < -MAXLOG)
 		{
-			if (a < 0) return (2.0);
-			else return (0.0);
+		    if (a < 0) return (2.0);
+		    return (0.0);
 		}
 
-		z = Math.Exp(z);
+	    z = Math.Exp(z);
 
 		if (x < 8.0)
 		{
@@ -941,12 +936,12 @@ public class SpecialFunction
 
 		if (y == 0.0)
 		{
-			if (a < 0) return 2.0;
-			else return (0.0);
+		    if (a < 0) return 2.0;
+		    return (0.0);
 		}
 
 
-		return y;
+	    return y;
 	}
 
 		

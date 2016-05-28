@@ -1,16 +1,5 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TestResultsWindow.xaml.cs" company="NTUU 'KPI'">
-//   Created by Max Bondarchuk
-// </copyright>
-// <summary>
-//   Findow for test results
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
-
-namespace FFA_Clustering
+﻿namespace FFA_Clustering
 {
-    using System;
-
     /// <summary>
     /// Window for test results
     /// </summary>
@@ -22,7 +11,7 @@ namespace FFA_Clustering
         /// </summary>
         public TestResultsWindow()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

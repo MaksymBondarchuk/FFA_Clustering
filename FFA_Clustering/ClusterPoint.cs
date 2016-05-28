@@ -18,7 +18,7 @@ namespace FFA_Clustering
 
         public double Dist2To(ClusterPoint cp)
         {
-            return this.X.Select((t, i) => (t - cp.X[i])*(t - cp.X[i])).Sum();
+            return X.Select((t, i) => (t - cp.X[i])*(t - cp.X[i])).Sum();
         }
     }
 }

@@ -1,16 +1,7 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="JSONObject.cs" company="NTUU 'KPI'">
-//   Created by Max Bondarchuk
-// </copyright>
-// <summary>
-//   Defines the JsonObject type.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+﻿using System.Collections.Generic;
 
 namespace FFA_Clustering
 {
-    using System.Collections.Generic;
-
     /// <summary>
     /// Class for load to/upload from JSON-file data set
     /// </summary>
