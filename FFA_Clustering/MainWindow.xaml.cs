@@ -269,20 +269,17 @@ namespace FFA_Clustering
 
                 Draw();
 
-                if (iter == Algorithm.MaximumGenerations - 1 ||
-                    Algorithm.MfaCanStop)
-                {
-                    IsRunClicked = false;
-                    LabelInfo.Content = "MFA finished";
-                    await CanvasFlash();
-                    return;
-                }
+                if (Algorithm.MfaCanStop)
+                    break;
 
                 ProgressBarInfo.Value = iter * 100 / (double)Algorithm.MaximumGenerations;
                 LabelInfo.Content = $"{LabelInfoRequiredPart}Iteration #{iter}";
                 await Task.Delay(IterationDelay);
             }
+            IsRunClicked = false;
+            LabelInfo.Content = "MFA finished";
             ProgressBarInfo.Value = 100;
+            await CanvasFlash();
         }
 
         private async void ButtonKMeansClick(object sender, RoutedEventArgs e)
@@ -341,7 +338,7 @@ namespace FFA_Clustering
             if (Algorithm.Fireflies.Count != 0)
             {
                 var ff = Algorithm.Fireflies.First();
-                TextBoxSumOfSquaredError.Text = $"{ff.SumOfSquaredError}";
+                TextBoxSumOfSquaredError.Text = $"{Math.Truncate(ff.SumOfSquaredError)}";
                 TextBoxSilhouetteMethod.Text = $"{Algorithm.SilhouetteMethod(ff),-10:0.00000000}";
                 TextBoxXieBeniIndex.Text = $"{Algorithm.XieBeniIndex(ff),-10:0.00000000}";
                 Algorithm.UpdatePoints(ff);
@@ -521,9 +518,9 @@ namespace FFA_Clustering
                 await Task.Delay(500);
             }
 
-            var sseText = $"{sse / runsNumber,20}";
-            var smText = $"{sm / runsNumber,-20:0.0000000000}";
-            var xbText = $"{xb / runsNumber,-20:0.0000000000}";
+            var sseText = $"{Math.Truncate(sse / runsNumber), 15}";
+            var smText = $"{sm / runsNumber,-15:0.0000000000}";
+            var xbText = $"{xb / runsNumber,-15:0.0000000000}";
             ClipboardMessage += $"{algorithm};{sseText};{smText};{xbText}";
             return new TestListViewItem
             {
@@ -544,8 +541,8 @@ namespace FFA_Clustering
             for (var i = 0; i < 200; i++)
                 Clrs.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
             TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.KmeansPlusPlus));
-            //TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
-            //TestResultsWindow.Show();
+            TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
+            TestResultsWindow.ShowDialog();
             LabelInfoRequiredPart = string.Empty;
             LabelInfo.Content = "Test are finished";
             Clipboard.SetText(ClipboardMessage);

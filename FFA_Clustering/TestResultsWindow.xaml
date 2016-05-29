@@ -4,15 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Test Results" Height="200" Width="554" WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight" ResizeMode="NoResize" Topmost="True">
+        Title="Test Results" Height="200" Width="578" WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight" ResizeMode="NoResize">
     <Grid>
-        <ListView x:Name="ListViewInfoTestResults" Margin="10,10,10,10" IsHitTestVisible="True" BorderThickness="1" Background="White">
+        <ListView x:Name="ListViewInfoTestResults" Margin="10,10,10,10" IsHitTestVisible="True" BorderThickness="1" Background="White" FontFamily="Consolas">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Algorithm" DisplayMemberBinding="{Binding Algorithm}" Width="200"/>
-                    <GridViewColumn Header="SSE" DisplayMemberBinding="{Binding SumOfSquaredError}" Width="100"/>
-                    <GridViewColumn Header="SM" DisplayMemberBinding="{Binding SilhouetteMethod}" Width="100"/>
-                    <GridViewColumn Header="XB" DisplayMemberBinding="{Binding XieBeniIndex}" Width="100"/>
+                    <GridViewColumn Header="Algorithm" DisplayMemberBinding="{Binding Algorithm}" Width="Auto"/>
+                    <GridViewColumn Header="SSE" DisplayMemberBinding="{Binding SumOfSquaredError}" Width="Auto"/>
+                    <GridViewColumn Header="SM" DisplayMemberBinding="{Binding SilhouetteMethod}" Width="Auto"/>
+                    <GridViewColumn Header="XB" DisplayMemberBinding="{Binding XieBeniIndex}" Width="Auto"/>
                 </GridView>
             </ListView.View>
         </ListView>
