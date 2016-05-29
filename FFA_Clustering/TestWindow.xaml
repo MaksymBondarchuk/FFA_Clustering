@@ -1,0 +1,22 @@
+﻿<Window x:Class="FFA_Clustering.TestWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="TestWindow" Height="900" Width="1600" WindowStartupLocation="CenterScreen" WindowState="Maximized" WindowStyle="None" Background="#FFB02A2A" Loaded="Window_Loaded">
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard >
+                    <DoubleAnimation Duration="0:0:5" Storyboard.TargetProperty="Left" From="1600" To="0" AccelerationRatio=".1"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+
+    <Grid>
+        <Label Content="YOU ARE BEAUTIFUL" HorizontalAlignment="Center" Margin="253,300,287,322" VerticalAlignment="Center" Height="270" Width="1052" FontSize="100" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="White"/>
+
+    </Grid>
+</Window>

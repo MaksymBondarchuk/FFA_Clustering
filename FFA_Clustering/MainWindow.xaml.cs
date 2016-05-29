@@ -78,19 +78,38 @@ namespace FFA_Clustering
 
         private async void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            //await Task.Delay(1000);
-            //await this.Dispatcher.BeginInvoke((Action)(() => this.TabControlMain.SelectedIndex = 1));
+//            await Task.Delay(1000);
+//            await Dispatcher.BeginInvoke((Action)(() => TabControlMain.SelectedIndex = 1));
+//            await Task.Delay(1000);
 
-            //await this.MouseClick(new Point(100, 100));
-            //await Task.Delay(1000);
+//#pragma warning disable 4014
+//            MouseClick(new Point(200, 200));
+//            await Task.Delay(1000);
 
-            //await this.MouseClick(new Point(200, 200));
-            //await Task.Delay(1000);
+//            MouseClick(new Point(350, 350));
+//            await Task.Delay(1000);
 
-            //await this.MouseClick(new Point(300, 300));
-            //await Task.Delay(1000);
+//            MouseClick(new Point(500, 200));
+//            await Task.Delay(1000);
+
+//            MouseClick(new Point(650, 350));
+//            await Task.Delay(1000);
+
+//            await MouseClick(new Point(800, 200));
+//            await Task.Delay(1000);
+//#pragma warning restore 4014
+
+//            await Dispatcher.BeginInvoke((Action)(() => TabControlMain.SelectedIndex = 0));
+//            await Task.Delay(1000);
+
+//            await Dispatcher.BeginInvoke((Action)(() => TabControlTest.SelectedIndex = 1));
+//            await Task.Delay(1000);
+
+//            ButtonRunTestsClick(null, null);
+
             await Task.Delay(0);
         }
+
         #endregion
 
         #region Controller
@@ -524,40 +543,32 @@ namespace FFA_Clustering
         private async void ButtonRunTestsClick(object sender, RoutedEventArgs e)
         {
             ClipboardMessage = string.Empty;
-            var a = await GetResult(Properties.Resources.Kmeans);
             TestResultsWindow = new TestResultsWindow();
             TestResultsWindow.ListViewInfoTestResults.Items.Clear();
-            TestResultsWindow.ListViewInfoTestResults.Items.Add(a);
+            TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.Kmeans));
+            Clrs.Clear();
+            for (var i = 0; i < 200; i++)
+                Clrs.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
             TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.KmeansPlusPlus));
             //TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
-            TestResultsWindow.Show();
+            //TestResultsWindow.Show();
             LabelInfoRequiredPart = string.Empty;
             LabelInfo.Content = "Test are finished";
             Clipboard.SetText(ClipboardMessage);
+
+            //await Task.Delay(2000);
+            //var testWindow = new TestWindow();
+            //testWindow.Show();
         }
         #endregion
 
         #region Animation
         private void TabControlMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            int from;
-            int to;
-            if (TabControlMain.SelectedIndex == 0)
-            {
-                from = 260;
-                to = 510;
-            }
-            else
-            {
-                from = 510;
-                to = 260;
-            }
-
             var da = new DoubleAnimation
             {
-                From = from,
-                To = to,
-                Duration = new Duration(TimeSpan.FromMilliseconds(250))
+                To = TabControlMain.SelectedIndex == 0 ? 510 : 260,
+                Duration = new Duration(TimeSpan.FromMilliseconds(500))
             };
             TabControlMain.BeginAnimation(HeightProperty, da);
         }
@@ -584,33 +595,26 @@ namespace FFA_Clustering
             cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
         }
 
+        [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
         private async Task CanvasFlash()
         {
-            const int animationWait = 150;
-            var previousColor = new SolidColorBrush(((SolidColorBrush)CanvasMain.Background).Color).Color;
+            const int animationWait = 300;
+            //var previousColor = new SolidColorBrush(((SolidColorBrush)CanvasMain.Background).Color).Color;
             var cb = CanvasMain.Background;
-            var convertFromString = ColorConverter.ConvertFromString("#FF007ACC");
-            if (convertFromString != null)
+            var convertFromString = (Color)ColorConverter.ConvertFromString("#FF007ACC");
+            var da = new ColorAnimation
             {
-                var da = new ColorAnimation
-                {
-                    From = previousColor,
-                    To = (Color)convertFromString,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
-                };
-                cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
-            }
+                To = convertFromString,
+                Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+            };
+            cb.BeginAnimation(SolidColorBrush.ColorProperty, da);
             await Task.Delay(animationWait);
-            if (convertFromString != null)
+            var da1 = new ColorAnimation
             {
-                var da1 = new ColorAnimation
-                {
-                    From = (Color)convertFromString,
-                    To = previousColor,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
-                };
-                cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
-            }
+                To = Colors.White,
+                Duration = new Duration(TimeSpan.FromMilliseconds(animationWait))
+            };
+            cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
         }
 
         /// <summary>
@@ -624,8 +628,8 @@ namespace FFA_Clustering
         {
             Color newColorBrush;
             Color oldColorBrush;
-            var blue = (Color) ColorConverter.ConvertFromString("#FF007ACC");
-            var violet = (Color) ColorConverter.ConvertFromString("#FF68217A");
+            var blue = (Color)ColorConverter.ConvertFromString("#FF007ACC");
+            var violet = (Color)ColorConverter.ConvertFromString("#FF68217A");
 
             if (fillOrClear)
             {
