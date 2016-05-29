@@ -78,34 +78,34 @@ namespace FFA_Clustering
 
         private async void WindowLoaded(object sender, RoutedEventArgs e)
         {
-//            await Task.Delay(1000);
-//            await Dispatcher.BeginInvoke((Action)(() => TabControlMain.SelectedIndex = 1));
-//            await Task.Delay(1000);
+            //            await Task.Delay(1000);
+            //            await Dispatcher.BeginInvoke((Action)(() => TabControlMain.SelectedIndex = 1));
+            //            await Task.Delay(1000);
 
-//#pragma warning disable 4014
-//            MouseClick(new Point(200, 200));
-//            await Task.Delay(1000);
+            //#pragma warning disable 4014
+            //            MouseClick(new Point(200, 200));
+            //            await Task.Delay(1000);
 
-//            MouseClick(new Point(350, 350));
-//            await Task.Delay(1000);
+            //            MouseClick(new Point(350, 350));
+            //            await Task.Delay(1000);
 
-//            MouseClick(new Point(500, 200));
-//            await Task.Delay(1000);
+            //            MouseClick(new Point(500, 200));
+            //            await Task.Delay(1000);
 
-//            MouseClick(new Point(650, 350));
-//            await Task.Delay(1000);
+            //            MouseClick(new Point(650, 350));
+            //            await Task.Delay(1000);
 
-//            await MouseClick(new Point(800, 200));
-//            await Task.Delay(1000);
-//#pragma warning restore 4014
+            //            await MouseClick(new Point(800, 200));
+            //            await Task.Delay(1000);
+            //#pragma warning restore 4014
 
-//            await Dispatcher.BeginInvoke((Action)(() => TabControlMain.SelectedIndex = 0));
-//            await Task.Delay(1000);
+            //            await Dispatcher.BeginInvoke((Action)(() => TabControlMain.SelectedIndex = 0));
+            //            await Task.Delay(1000);
 
-//            await Dispatcher.BeginInvoke((Action)(() => TabControlTest.SelectedIndex = 1));
-//            await Task.Delay(1000);
+            //            await Dispatcher.BeginInvoke((Action)(() => TabControlTest.SelectedIndex = 1));
+            //            await Task.Delay(1000);
 
-//            ButtonRunTestsClick(null, null);
+            //            ButtonRunTestsClick(null, null);
 
             await Task.Delay(0);
         }
@@ -151,10 +151,7 @@ namespace FFA_Clustering
                     return;
                 }
 
-                var cp = new ClusterPoint();
-                cp.X.Add(mouseLocation.X);
-                cp.X.Add(mouseLocation.Y);
-                ShitEater.Centroids.Add(cp);
+                ShitEater.Centroids.Add(new ClusterPoint { X = mouseLocation.X, Y = mouseLocation.Y });
                 ShitEater.CentroidPoints.Add(new List<int>());
 
                 ClickedTimes++;
@@ -221,10 +218,7 @@ namespace FFA_Clustering
                     Margin = new Thickness(x - HalfPointSize, y - HalfPointSize, 0, 0)
                 });
 
-                var p = new ClusterPoint();
-                p.X.Add(x);
-                p.X.Add(y);
-                Algorithm.Points.Add(p);
+                Algorithm.Points.Add(new ClusterPoint {X = x, Y = y});
                 await Task.Delay(1);
             }
             CanvasClicksHandled++;
@@ -363,7 +357,7 @@ namespace FFA_Clustering
                     Fill = new SolidColorBrush(pointColor),
                     Width = 2 * HalfPointSize,
                     Height = 2 * HalfPointSize,
-                    Margin = new Thickness(point.X[0] - HalfPointSize, point.X[1] - HalfPointSize, 0, 0)
+                    Margin = new Thickness(point.X - HalfPointSize, point.Y - HalfPointSize, 0, 0)
                 });
             }
 
@@ -386,7 +380,7 @@ namespace FFA_Clustering
                         Fill = new SolidColorBrush(clr),//new SolidColorBrush(Colors.Black),
                         Width = sz,
                         Height = sz,
-                        Margin = new Thickness(fireflyPoint.X[0] - offset, fireflyPoint.X[1] - offset, 0, 0)
+                        Margin = new Thickness(fireflyPoint.X - offset, fireflyPoint.Y - offset, 0, 0)
                     });
                 }
             }
@@ -598,7 +592,7 @@ namespace FFA_Clustering
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
         private async Task CanvasFlash()
         {
-            const int animationWait = 300;
+            const int animationWait = 150;
             //var previousColor = new SolidColorBrush(((SolidColorBrush)CanvasMain.Background).Color).Color;
             var cb = CanvasMain.Background;
             var convertFromString = (Color)ColorConverter.ConvertFromString("#FF007ACC");

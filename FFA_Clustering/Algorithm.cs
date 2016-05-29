@@ -37,10 +37,11 @@ namespace FFA_Clustering
                 var firefly = new Firefly();
                 for (var i = 0; i < clustersNumber; i++)
                 {
-                    var point = new ClusterPoint();
-                    point.X.Add(Rand.Next(RangeX));
-                    point.X.Add(Rand.Next(RangeY));
-                    firefly.Centroids.Add(point);
+                    firefly.Centroids.Add(new ClusterPoint
+                    {
+                        X = Rand.Next(RangeX),
+                        Y = Rand.Next(RangeY)
+                    });
                     firefly.CentroidPoints.Add(new List<int>());
                 }
                 firefly.SumOfSquaredError = SumOfSquaredError(firefly);
@@ -90,7 +91,7 @@ namespace FFA_Clustering
                 var indexOfMinCentroid = -1;
                 for (var i = 0; i < firefly.Centroids.Count; i++)
                 {
-                    var r2 = point.X.Select((t, j) => (t - firefly.Centroids[i].X[j]) * (t - firefly.Centroids[i].X[j])).Sum();
+                    var r2 = point.Dist2To(firefly.Centroids[i]);
                     if (distMin <= r2) continue;
                     distMin = r2;
                     indexOfMinCentroid = i;
@@ -189,19 +190,32 @@ namespace FFA_Clustering
         {
             for (var i = 0; i < firefly.Centroids.Count; i++)
             {
-                var r2 = firefly.Centroids[i].X.Select((t, h) =>
-                (t - fireflyTo.Centroids[i].X[h]) * (t - fireflyTo.Centroids[i].X[h])).Sum();
+                var r2 = firefly.Centroids[i].Dist2To(fireflyTo.Centroids[i]);
+                //var r2 = firefly.Centroids[i].P.Select((t, h) =>
+                //(t - fireflyTo.Centroids[i].P[h]) * (t - fireflyTo.Centroids[i].P[h])).Sum();
 
                 var brightness = .5 / (1 + 1e-4 * r2);
-                for (var h = 0; h < firefly.Centroids[i].X.Count; h++)
-                {
-                    var randomPart = alpha * (Rand.NextDouble() - .5) * MantegnaRandom(lambda);
-                    firefly.Centroids[i].X[h] += brightness * (fireflyTo.Centroids[i].X[h] - firefly.Centroids[i].X[h]) + randomPart;
+                var randomPartX = alpha * (Rand.NextDouble() - .5) * MantegnaRandom(lambda);
+                var randomPartY = alpha * (Rand.NextDouble() - .5) * MantegnaRandom(lambda);
+                firefly.Centroids[i].X += brightness * (fireflyTo.Centroids[i].X - firefly.Centroids[i].X) + randomPartX;
+                firefly.Centroids[i].Y += brightness * (fireflyTo.Centroids[i].Y - firefly.Centroids[i].Y) + randomPartY;
 
-                    if (firefly.Centroids[i].X[h] < 0 || RangeX < firefly.Centroids[i].X[h] ||
-                        double.IsNaN(firefly.Centroids[i].X[h]))
-                        firefly.Centroids[i].X[h] = Rand.Next(RangeX);
-                }
+                if (firefly.Centroids[i].X < 0 || RangeX <= firefly.Centroids[i].X ||
+                        double.IsNaN(firefly.Centroids[i].X))
+                    firefly.Centroids[i].X = Rand.Next(RangeX);
+                if (firefly.Centroids[i].Y < 0 || RangeY <= firefly.Centroids[i].Y ||
+                        double.IsNaN(firefly.Centroids[i].Y))
+                    firefly.Centroids[i].Y = Rand.Next(RangeY);
+
+                //for (var h = 0; h < firefly.Centroids[i].P.Count; h++)
+                //{
+                //    var randomPart = alpha * (Rand.NextDouble() - .5) * MantegnaRandom(lambda);
+                //    firefly.Centroids[i].P[h] += brightness * (fireflyTo.Centroids[i].P[h] - firefly.Centroids[i].P[h]) + randomPart;
+
+                //    if (firefly.Centroids[i].P[h] < 0 || RangeX < firefly.Centroids[i].P[h] ||
+                //        double.IsNaN(firefly.Centroids[i].P[h]))
+                //        firefly.Centroids[i].P[h] = Rand.Next(RangeX);
+                //}
 
                 firefly.SumOfSquaredError = SumOfSquaredError(firefly);
             }
@@ -255,10 +269,7 @@ namespace FFA_Clustering
 
             var firefly = new Firefly();
             var randomPoint = Points[Rand.Next(Points.Count)];
-            var firstCentroid = new ClusterPoint();
-            firstCentroid.X.Add(randomPoint.X[0]);
-            firstCentroid.X.Add(randomPoint.X[1]);
-            firefly.Centroids.Add(firstCentroid);
+            firefly.Centroids.Add(new ClusterPoint { X = randomPoint.X, Y = randomPoint.Y });
             firefly.CentroidPoints.Add(new List<int>());
 
             for (var i = 1; i < clustersNumber; i++)
@@ -269,7 +280,7 @@ namespace FFA_Clustering
                     var distMin = double.MaxValue;
                     foreach (var c in firefly.Centroids)
                     {
-                        var r2 = point.X.Select((t, j) => (t - c.X[j]) * (t - c.X[j])).Sum();
+                        var r2 = point.Dist2To(c);
                         if (distMin <= r2) continue;
                         distMin = r2;
                     }
@@ -284,17 +295,14 @@ namespace FFA_Clustering
                     var distMin = double.MaxValue;
                     foreach (var c in firefly.Centroids)
                     {
-                        var r2 = point.X.Select((t, j) => (t - c.X[j]) * (t - c.X[j])).Sum();
+                        var r2 = point.Dist2To(c);
                         if (distMin <= r2) continue;
                         distMin = r2;
                     }
 
                     if (sse <= rNeeded && rNeeded <= sse + distMin)
                     {
-                        var newCentroid = new ClusterPoint();
-                        newCentroid.X.Add(point.X[0]);
-                        newCentroid.X.Add(point.X[1]);
-                        firefly.Centroids.Add(newCentroid);
+                        firefly.Centroids.Add(new ClusterPoint { X = point.X, Y = point.Y });
                         firefly.CentroidPoints.Add(new List<int>());
                         break;
                     }
@@ -315,22 +323,20 @@ namespace FFA_Clustering
             var finalPointsNumber = 0;
             for (var i = 0; i < firefly.Centroids.Count; i++)
             {
-                var c = firefly.Centroids[i];
                 var cp = firefly.CentroidPoints[i];
 
                 if (cp.Count == 0)
                     cp.Add(0);
 
-                var newPoint = new ClusterPoint();
-                for (var j = 0; j < c.X.Count; j++)
-                    newPoint.X.Add(0);
+                var newPoint = new ClusterPoint { X = 0, Y = 0 };
 
                 foreach (var cpIdx in cp)
-                    for (var h = 0; h < Points[cpIdx].X.Count; h++)
-                        newPoint.X[h] += Points[cpIdx].X[h];
-
-                for (var h = 0; h < newPoint.X.Count; h++)
-                    newPoint.X[h] /= cp.Count;
+                {
+                    newPoint.X += Points[cpIdx].X;
+                    newPoint.Y += Points[cpIdx].Y;
+                }
+                newPoint.X /= cp.Count;
+                newPoint.Y /= cp.Count;
 
                 if (firefly.Centroids[i].Dist2To(newPoint) < 1e-4)
                     finalPointsNumber++;

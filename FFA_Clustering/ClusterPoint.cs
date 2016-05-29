@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Windows;
 
 namespace FFA_Clustering
 {
@@ -8,17 +7,25 @@ namespace FFA_Clustering
         /// <summary>
         /// Coordinates
         /// </summary>
-        // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global (without this "set" JSON-file cannot be loaded)
-        public List<double> X { get; set; } = new List<double>();
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global (without this "set" JSON-file cannot be loaded)
+        public double X { get; set; }
+        public double Y { get; set; }
 
         /// <summary>
         /// Number of centroid point belongs to
         /// </summary>
         public int BelongsToCentroid { get; set; } = -1;
 
+        /// <summary>
+        /// Calculates distance to other point
+        /// </summary>
+        /// <param name="cp">Point calculate distance to</param>
+        /// <returns></returns>
         public double Dist2To(ClusterPoint cp)
         {
-            return X.Select((t, i) => (t - cp.X[i])*(t - cp.X[i])).Sum();
+            var x = X - cp.X;
+            var y = Y - cp.Y;
+            return x * x + y * y;
         }
     }
 }
