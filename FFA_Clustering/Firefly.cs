@@ -8,5 +8,14 @@ namespace FFA_Clustering
         public List<List<int>> CentroidPoints { get; } = new List<List<int>>();
 
         public double SumOfSquaredError { get; set; }
+
+        //    public Firefly(Firefly ff)
+        //    {
+        //        Centroids = new List<ClusterPoint>();
+        //        Centroids.AddRange(ff.Centroids);
+
+        //        CentroidPoints = new List<List<int>>();
+        //        CentroidPoints.AddRange(ff.CentroidPoints);
+        //    }
     }
 }

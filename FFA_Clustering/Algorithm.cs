@@ -8,7 +8,7 @@ namespace FFA_Clustering
     public class Algorithm
     {
         #region Public constants
-        public const int MaximumGenerations = 50;
+        public const int MaximumGenerations = 100;
         #endregion
 
         #region Private properties
@@ -27,6 +27,8 @@ namespace FFA_Clustering
         public List<Firefly> Fireflies { get; set; } = new List<Firefly>();
 
         public bool KMeansCanStop { get; private set; }
+
+        public int MovesOnLastIteration { get; set; }
         #endregion
 
         #region Additional 
@@ -157,6 +159,7 @@ namespace FFA_Clustering
         public async Task Iteration(int number)
         {
             MfaCanStop = true;
+            MovesOnLastIteration = 0;
             //var bestSse = this.Fireflies.First().SumOfSquaredError;
             var alphaT = 1e-3 * Math.Pow(Delta, number);
 
@@ -165,10 +168,10 @@ namespace FFA_Clustering
                 var lambdaI = .5 - i * (.5 - 1.9) / (Fireflies.Count - 1);
                 for (var j = 0; j < Fireflies.Count; j++)
                 {
-                    if (i == j || Fireflies[i].SumOfSquaredError < Fireflies[j].SumOfSquaredError)
+                    if (i == j)// || Fireflies[i].SumOfSquaredError < Fireflies[j].SumOfSquaredError)
                         continue;
 
-                    MoveTowards(Fireflies[i], Fireflies[j], alphaT, lambdaI);
+                    MoveTowards(i, j, alphaT, lambdaI);
                     MfaCanStop = false;
                 }
             }
@@ -186,10 +189,26 @@ namespace FFA_Clustering
             Fireflies.Sort((f1, f2) => f1.SumOfSquaredError.CompareTo(f2.SumOfSquaredError));
         }
 
-        private void MoveTowards(Firefly firefly, Firefly fireflyTo, double alpha, double lambda)
+        private void MoveTowards(int idx, int idxTo, double alpha, double lambda)
         {
+            var firefly = Fireflies[idx];
+            var fireflyTo = Fireflies[idxTo];
+            var wasMovement = false;
             for (var i = 0; i < firefly.Centroids.Count; i++)
             {
+                var ff = new Firefly();
+                for (var j = 0; j < firefly.Centroids.Count; j++)
+                {
+                    ff.Centroids.Add(i != j
+                        ? new ClusterPoint { X = firefly.Centroids[j].X, Y = firefly.Centroids[j].Y }
+                        : new ClusterPoint { X = fireflyTo.Centroids[j].X, Y = fireflyTo.Centroids[j].Y });
+                    ff.CentroidPoints.Add(new List<int>());
+                }
+                ff.SumOfSquaredError = SumOfSquaredError(ff);
+
+                if (firefly.SumOfSquaredError < ff.SumOfSquaredError && idxTo != 0)
+                    continue;
+
                 var r2 = firefly.Centroids[i].Dist2To(fireflyTo.Centroids[i]);
                 //var r2 = firefly.Centroids[i].P.Select((t, h) =>
                 //(t - fireflyTo.Centroids[i].P[h]) * (t - fireflyTo.Centroids[i].P[h])).Sum();
@@ -206,7 +225,7 @@ namespace FFA_Clustering
                 if (firefly.Centroids[i].Y < 0 || RangeY <= firefly.Centroids[i].Y ||
                         double.IsNaN(firefly.Centroids[i].Y))
                     firefly.Centroids[i].Y = Rand.Next(RangeY);
-
+                wasMovement = true;
                 //for (var h = 0; h < firefly.Centroids[i].P.Count; h++)
                 //{
                 //    var randomPart = alpha * (Rand.NextDouble() - .5) * MantegnaRandom(lambda);
@@ -219,6 +238,9 @@ namespace FFA_Clustering
 
                 firefly.SumOfSquaredError = SumOfSquaredError(firefly);
             }
+
+            if (wasMovement)
+                MovesOnLastIteration++;
         }
 
 
@@ -260,6 +282,7 @@ namespace FFA_Clustering
             Fireflies.Clear();
             AddRandomFireflies(1, clustersNumber);
             FillCentroidPoints(Fireflies.First());
+            MovesOnLastIteration = -1;
         }
 
         public void InitializationKMeansPlusPlus(int clustersNumber)

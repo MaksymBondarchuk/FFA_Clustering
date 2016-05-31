@@ -52,6 +52,8 @@ namespace FFA_Clustering
         private bool AlreadyViolet { get; set; } = true;
 
         private TestResultsWindow TestResultsWindow { get; set; }
+
+        private int TabControlMainHeight { get; set; }
         #endregion
 
         #region Constructors
@@ -73,7 +75,18 @@ namespace FFA_Clustering
             //OpenFile("C:\\Users\\Max\\Downloads\\InitialSet.json");
 
             for (var i = 0; i < 200; i++)
-                Clrs.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
+            {
+                var color = Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255));
+
+                var alreadyHaveThisColor = false;
+                foreach (var clr in Clrs)
+                    if (Color.AreClose(color, clr))
+                        alreadyHaveThisColor = true;
+                if (!alreadyHaveThisColor)
+                    Clrs.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
+            }
+
+            TabControlMainHeight = (int)TabControlMain.Height;
         }
 
         private async void WindowLoaded(object sender, RoutedEventArgs e)
@@ -218,7 +231,7 @@ namespace FFA_Clustering
                     Margin = new Thickness(x - HalfPointSize, y - HalfPointSize, 0, 0)
                 });
 
-                Algorithm.Points.Add(new ClusterPoint {X = x, Y = y});
+                Algorithm.Points.Add(new ClusterPoint { X = x, Y = y });
                 await Task.Delay(1);
             }
             CanvasClicksHandled++;
@@ -341,6 +354,9 @@ namespace FFA_Clustering
                 TextBoxSumOfSquaredError.Text = $"{Math.Truncate(ff.SumOfSquaredError)}";
                 TextBoxSilhouetteMethod.Text = $"{Algorithm.SilhouetteMethod(ff),-10:0.00000000}";
                 TextBoxXieBeniIndex.Text = $"{Algorithm.XieBeniIndex(ff),-10:0.00000000}";
+                TextBoxMovements.Text = Algorithm.MovesOnLastIteration == -1
+                    ? string.Empty
+                    : Algorithm.MovesOnLastIteration.ToString();
                 Algorithm.UpdatePoints(ff);
                 CanvasMain.Children.Clear();
             }
@@ -518,7 +534,7 @@ namespace FFA_Clustering
                 await Task.Delay(500);
             }
 
-            var sseText = $"{Math.Truncate(sse / runsNumber), 15}";
+            var sseText = $"{Math.Truncate(sse / runsNumber),15}";
             var smText = $"{sm / runsNumber,-15:0.0000000000}";
             var xbText = $"{xb / runsNumber,-15:0.0000000000}";
             ClipboardMessage += $"{algorithm};{sseText};{smText};{xbText}";
@@ -558,7 +574,7 @@ namespace FFA_Clustering
         {
             var da = new DoubleAnimation
             {
-                To = TabControlMain.SelectedIndex == 0 ? 510 : 260,
+                To = TabControlMain.SelectedIndex == 0 ? TabControlMainHeight : 260,
                 Duration = new Duration(TimeSpan.FromMilliseconds(500))
             };
             TabControlMain.BeginAnimation(HeightProperty, da);
