@@ -7,17 +7,16 @@ namespace FFA_Clustering
 {
     public class Algorithm
     {
-        #region Public constants
+        #region Constants: public
         public const int MaximumGenerations = 100;
         #endregion
 
-        #region Private properties
-        private double Delta { get; set; }
-
-        private Random Rand { get; } = new Random();
+        #region Constants: private
+        private const int IterationsToWait = 10;
+        private const int ValueToStop = 1000;
         #endregion
 
-        #region Public properties
+        #region Properties: public
         public bool MfaCanStop { get; private set; }
         public int RangeX { private get; set; }
         public int RangeY { private get; set; }
@@ -28,7 +27,17 @@ namespace FFA_Clustering
 
         public bool KMeansCanStop { get; private set; }
 
-        public int MovesOnLastIteration { get; set; }
+        public int MovesOnLastIteration { get; private set; }
+
+        public bool IsInFastMfaMode { get; set; }
+        #endregion
+
+        #region Properties: private
+        private double Delta { get; set; }
+
+        private Random Rand { get; } = new Random();
+
+        private List<double> SseHistory { get; } = new List<double>();
         #endregion
 
         #region Additional 
@@ -151,6 +160,7 @@ namespace FFA_Clustering
         {
             Fireflies.Clear();
             Delta = Math.Pow(1e-4 / 1.09, 1.0 / MaximumGenerations);
+            SseHistory.Clear();
 
             AddRandomFireflies(firefliesNumber, clustersNumber);
             RankSwarm();
@@ -160,7 +170,7 @@ namespace FFA_Clustering
         {
             MfaCanStop = true;
             MovesOnLastIteration = 0;
-            //var bestSse = this.Fireflies.First().SumOfSquaredError;
+
             var alphaT = 1e-3 * Math.Pow(Delta, number);
 
             for (var i = 0; i < Fireflies.Count; i++)
@@ -178,8 +188,12 @@ namespace FFA_Clustering
 
             RankSwarm();
 
-            //if (Math.Abs(this.Fireflies.First().SumOfSquaredError - bestSse) <= 1)
-            //    this.MfaCanStop = true;
+            var bestFirefly = Fireflies.First();
+            SseHistory.Add(bestFirefly.SumOfSquaredError);
+
+            if (IsInFastMfaMode && IterationsToWait <= SseHistory.Count &&
+                Math.Abs(SseHistory[number - IterationsToWait] - bestFirefly.SumOfSquaredError) < ValueToStop)
+                MfaCanStop = true;
 
             await Task.Delay(0);
         }

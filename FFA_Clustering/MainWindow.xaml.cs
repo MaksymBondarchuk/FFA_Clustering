@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using System.Windows.Shell;
 using Microsoft.Win32;
 
 namespace FFA_Clustering
@@ -22,13 +23,13 @@ namespace FFA_Clustering
     /// </summary>
     public partial class MainWindow
     {
-        #region Private constants
+        #region Constants: private
         private const int HalfPointSize = 2;
         private const int IterationDelay = 125;
         private const int ClickDispersion = 15;
         #endregion
 
-        #region Private properties
+        #region Properties: private
         private Firefly ShitEater { get; } = new Firefly();
         private int ClickedTimes { get; set; }
 
@@ -141,36 +142,13 @@ namespace FFA_Clustering
 
         private async Task MouseClick(Point mouseLocation)
         {
-            if (TabControlMain.SelectedIndex == 0 ||    // Test mode
+            if (TabControlMain.SelectedIndex == 0 ||
                 TextBoxDispersion.Text.Equals(string.Empty) ||
                 TextBoxPointsPerClick.Text.Equals(string.Empty))
                 return;
 
             var dispersion = Convert.ToInt32(TextBoxDispersion.Text);
             var pointsPerClick = Convert.ToInt32(TextBoxPointsPerClick.Text);
-
-            #region Test
-            var isChecked = CheckBoxShitMode.IsChecked;
-            if (isChecked != null && (bool)isChecked)
-            {
-                var k = Convert.ToInt32(TextBoxClustersNumber.Text);
-
-                if (k - 1 <= ClickedTimes)
-                {
-                    Algorithm.Fireflies.Add(ShitEater);
-                    Algorithm.FillCentroidPoints(Algorithm.Fireflies.First());
-                    Algorithm.Fireflies.First().SumOfSquaredError = Algorithm.SumOfSquaredError(Algorithm.Fireflies.First());
-                    Draw();
-                    return;
-                }
-
-                ShitEater.Centroids.Add(new ClusterPoint { X = mouseLocation.X, Y = mouseLocation.Y });
-                ShitEater.CentroidPoints.Add(new List<int>());
-
-                ClickedTimes++;
-                return;
-            }
-            #endregion
 
             #region Click animation
 
@@ -198,7 +176,7 @@ namespace FFA_Clustering
                 return;
 
             #region Draw points
-
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
             CanvasClicks++;
             if (AlreadyViolet)
                 LabelInfo.Content = "Drawing points";
@@ -237,6 +215,7 @@ namespace FFA_Clustering
             CanvasClicksHandled++;
             if (CanvasClicks == CanvasClicksHandled)
             {
+                TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
                 await ProgressBarAnimation(true, Properties.Resources.ReadyMessage);
                 AlreadyViolet = false;
             }
@@ -272,7 +251,11 @@ namespace FFA_Clustering
             Algorithm.RangeY = (int)CanvasMain.ActualHeight;
 
             var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
+
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
+            Algorithm.IsInFastMfaMode = CheckBoxFastMfaMode.IsChecked != null && (bool)CheckBoxFastMfaMode.IsChecked;
             Algorithm.Initialization(Convert.ToInt32(TextBoxFirefliesNumber.Text), clustersNumber);
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
 
             for (var iter = 1; iter <= Algorithm.MaximumGenerations; iter++)
             {
@@ -285,13 +268,16 @@ namespace FFA_Clustering
                 if (Algorithm.MfaCanStop)
                     break;
 
-                ProgressBarInfo.Value = iter * 100 / (double)Algorithm.MaximumGenerations;
+                var pbValue = iter * 100 / (double)Algorithm.MaximumGenerations;
+                ProgressBarInfo.Value = pbValue;
+                TaskbarItemInfo.ProgressValue = pbValue * .01;
                 LabelInfo.Content = $"{LabelInfoRequiredPart}Iteration #{iter}";
                 await Task.Delay(IterationDelay);
             }
             IsRunClicked = false;
             LabelInfo.Content = "MFA finished";
             ProgressBarInfo.Value = 100;
+            TaskbarItemInfo.ProgressValue = 1;
             await CanvasFlash();
         }
 
@@ -309,10 +295,12 @@ namespace FFA_Clustering
 
             var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
             var button = sender as Button;
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
             if (Equals(button, ButtonKmeans))
                 Algorithm.InitializationKMeans(clustersNumber);
             else
                 Algorithm.InitializationKMeansPlusPlus(clustersNumber);
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
 
             var iter = 0;
             while (!Algorithm.KMeansCanStop)
@@ -323,6 +311,7 @@ namespace FFA_Clustering
                 LabelInfo.Content = $"{LabelInfoRequiredPart}Iteration #{iter}";
                 iter++;
                 ProgressBarInfo.Value = iter * 5;
+                TaskbarItemInfo.ProgressValue = iter * .05;
                 await Task.Delay(IterationDelay);
             }
 
@@ -330,6 +319,7 @@ namespace FFA_Clustering
                     ? $"{LabelInfoRequiredPart}K-means finished"
                     : $"{LabelInfoRequiredPart}K-means++ finished";
             ProgressBarInfo.Value = 100;
+            TaskbarItemInfo.ProgressValue = 1;
             await CanvasFlash();
         }
 
@@ -376,17 +366,14 @@ namespace FFA_Clustering
 
             for (var ffI = 0; ffI < Algorithm.Fireflies.Count; ffI++)
             {
-                var offset = (IsRunClicked && ffI == 0 ? 8 * HalfPointSize : 4 * HalfPointSize) * .5;
+                var offset = (ffI == 0 ? 8 * HalfPointSize : 4 * HalfPointSize) * .5;
                 var sz = 2 * offset;
 
                 var firefly = Algorithm.Fireflies[ffI];
                 for (var j = 0; j < firefly.Centroids.Count; j++)
-                //foreach (var fireflyPoint in firefly.Centroids)
                 {
                     var fireflyPoint = firefly.Centroids[j];
-                    //if (IsRunClicked)
                     var clr = IsRunClicked ? Clrs[ffI] : Clrs[j];
-                    //var sz = 4 * HalfPointSize;
                     CanvasMain.Children.Add(new Rectangle
                     {
                         Stroke = new SolidColorBrush(clr),
