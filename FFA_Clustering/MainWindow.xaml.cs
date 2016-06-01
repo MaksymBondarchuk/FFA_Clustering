@@ -30,9 +30,6 @@ namespace FFA_Clustering
         #endregion
 
         #region Properties: private
-        private Firefly ShitEater { get; } = new Firefly();
-        private int ClickedTimes { get; set; }
-
         private string ClipboardMessage { get; set; }
         private bool IsRunClicked { get; set; }
 

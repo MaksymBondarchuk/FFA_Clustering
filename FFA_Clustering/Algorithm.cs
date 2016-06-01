@@ -29,7 +29,7 @@ namespace FFA_Clustering
 
         public int MovesOnLastIteration { get; private set; }
 
-        public bool IsInFastMfaMode { get; set; }
+        public bool IsInFastMfaMode { private get; set; }
         #endregion
 
         #region Properties: private
@@ -60,7 +60,7 @@ namespace FFA_Clustering
             }
         }
 
-        public void FillCentroidPoints(Firefly firefly)
+        private void FillCentroidPoints(Firefly firefly)
         {
             foreach (var cp in firefly.CentroidPoints)
                 cp.Clear();
@@ -89,7 +89,8 @@ namespace FFA_Clustering
         #endregion
 
         #region Clustering validation criteria
-        public double SumOfSquaredError(Firefly firefly)
+
+        private double SumOfSquaredError(Firefly firefly)
         {
             foreach (var t in firefly.CentroidPoints)
                 t.Clear();
