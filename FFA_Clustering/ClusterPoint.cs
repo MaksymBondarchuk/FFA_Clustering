@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-namespace FFA_Clustering
+﻿namespace FFA_Clustering
 {
     public class ClusterPoint
     {

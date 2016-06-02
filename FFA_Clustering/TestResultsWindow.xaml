@@ -11,6 +11,7 @@
                 <GridView>
                     <GridViewColumn Header="Algorithm" DisplayMemberBinding="{Binding Algorithm}" Width="Auto"/>
                     <GridViewColumn Header="SSE" DisplayMemberBinding="{Binding SumOfSquaredError}" Width="Auto"/>
+                    <GridViewColumn Header="Deviation" DisplayMemberBinding="{Binding Deviation}" Width="Auto"/>
                     <GridViewColumn Header="SM" DisplayMemberBinding="{Binding SilhouetteMethod}" Width="Auto"/>
                     <GridViewColumn Header="XB" DisplayMemberBinding="{Binding XieBeniIndex}" Width="Auto"/>
                 </GridView>

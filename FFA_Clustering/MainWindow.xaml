@@ -31,13 +31,12 @@
                     <Label Content="Xie-Beni index" HorizontalAlignment="Left" Margin="10,109,0,0" VerticalAlignment="Top"/>
                     <TextBox x:Name="TextBoxMovements" HorizontalAlignment="Left" Height="23" Margin="10,189,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109" VerticalContentAlignment="Center" IsEnabled="False"/>
                     <Label Content="Movements on last iteration" HorizontalAlignment="Left" Margin="10,163,0,0" VerticalAlignment="Top"/>
-                    <TabControl x:Name="TabControlTest" HorizontalAlignment="Left" Height="174" Margin="10,270,0,0" VerticalAlignment="Top" Width="137">
+                    <TabControl x:Name="TabControlTest" HorizontalAlignment="Left" Height="125" Margin="10,270,0,0" VerticalAlignment="Top" Width="137">
                         <TabItem Header="Run algorithm">
                             <Grid>
-                                <Button x:Name="ButtonMfa" Content="MFA" HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRunClick" TabIndex="0"/>
+                                <Button x:Name="ButtonMfa" Content="MFA" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRunClick" TabIndex="0"/>
                                 <Button x:Name="ButtonKmeans" Content="K-means" HorizontalAlignment="Left" Margin="10,17,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeansClick"/>
                                 <Button x:Name="ButtonKmeansPlusPlus" Content="K-means++" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeansClick"/>
-                                <CheckBox x:Name="CheckBoxFastMfaMode" Content="Fast MFA mode" Margin="10,110,11,18" ToolTip="If the best firefly won't change his SSE on specified value for specified number of iterations, algorithm will stop" Checked="CheckBoxFastMfaMode_Checked"/>
                             </Grid>
                         </TabItem>
                         <TabItem Header="Test">
@@ -52,7 +51,8 @@
                     <Label Content="Clusters number" HorizontalAlignment="Left" Margin="11,449,0,0" VerticalAlignment="Top"/>
                     <TextBox x:Name="TextBoxFirefliesNumber" HorizontalAlignment="Left" Height="23" Margin="11,524,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt" VerticalContentAlignment="Center"/>
                     <Label Content="Fireflies number" HorizontalAlignment="Left" Margin="11,498,0,0" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="CheckBoxSimpleDrawMode" Content="Simple draw mode" Margin="10,250,47,292"/>
+                    <CheckBox x:Name="CheckBoxSimpleDrawMode" Content="Simple draw mode" Margin="10,250,47,292" ToolTip="Won't draw movemnts on each iteration. Won't calculate clustering validation criteria on each iteration"/>
+                    <CheckBox x:Name="CheckBoxFastMfaMode" Content="Fast MFA mode" Margin="10,227,74,312" ToolTip="If the best firefly won't change his SSE on specified value for specified number of iterations, algorithm will stop" Checked="CheckBoxFastMfaMode_Checked"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Draw mode">

@@ -431,7 +431,9 @@ namespace FFA_Clustering
                     -1 :
                     Convert.ToDouble(TextBoxXieBeniIndex.Text),
                 ClustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text),
-                TestRunsNumber = Convert.ToInt32(TextBoxRunsNumber.Text)
+                TestRunsNumber = Convert.ToInt32(TextBoxRunsNumber.Text),
+                IsInFastMfaMode = CheckBoxFastMfaMode.IsChecked == true,
+                IsInSimpleDrawMode = CheckBoxSimpleDrawMode.IsChecked == true
             };
             var json = new JavaScriptSerializer().Serialize(obj);
             var file = new StreamWriter(fileName);
@@ -482,6 +484,9 @@ namespace FFA_Clustering
             TextBoxClustersNumber.Text = results.ClustersNumber.ToString();
             TextBoxRunsNumber.Text = results.TestRunsNumber.ToString();
 
+            CheckBoxFastMfaMode.IsChecked = results.IsInFastMfaMode;
+            CheckBoxSimpleDrawMode.IsChecked = results.IsInSimpleDrawMode;
+
             Draw();
             if (Algorithm.Points.Count != 0)
                 await ProgressBarAnimation(true, Properties.Resources.ReadyMessage);
@@ -494,6 +499,7 @@ namespace FFA_Clustering
         {
             public string Algorithm { get; set; }
             public string SumOfSquaredError { get; set; }
+            public string Deviation { get; set; }
             public string SilhouetteMethod { get; set; }
             public string XieBeniIndex { get; set; }
         }
@@ -516,15 +522,26 @@ namespace FFA_Clustering
             var sm = 0.0;
             var xb = 0.0;
             var runsNumber = Convert.ToInt32(TextBoxRunsNumber.Text);
+            var sses = new List<double>(runsNumber);
             for (var i = 1; i <= runsNumber; i++)
             {
                 LabelInfoRequiredPart = $"Testing {algorithm}\t\tTest #{i}\t\t";
                 await action();
+                sses.Add(Convert.ToDouble(TextBoxSumOfSquaredError.Text));
                 sse += Convert.ToDouble(TextBoxSumOfSquaredError.Text);
                 sm += Convert.ToDouble(TextBoxSilhouetteMethod.Text);
                 xb += Convert.ToDouble(TextBoxXieBeniIndex.Text);
                 await Task.Delay(500);
             }
+            sse /= runsNumber;
+
+            double sum = 0;
+            foreach (var t in sses)
+                if (t > sse)
+                    sum += 100 * t / sse % 100;
+                else
+                    sum += 100 - 100 * t / sse % 100;
+            var deviation = sum / sses.Count;
 
             var sseText = $"{Math.Truncate(sse / runsNumber),15}";
             var smText = $"{sm / runsNumber,-15:0.0000000000}";
@@ -533,6 +550,7 @@ namespace FFA_Clustering
             return new TestListViewItem
             {
                 Algorithm = algorithm,
+                Deviation = $"{Math.Truncate(deviation)}%",
                 SumOfSquaredError = sseText,
                 SilhouetteMethod = smText,
                 XieBeniIndex = xbText

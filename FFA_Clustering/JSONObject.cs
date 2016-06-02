@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿
+
+using System.Collections.Generic;
 
 namespace FFA_Clustering
 {
@@ -42,5 +44,15 @@ namespace FFA_Clustering
         /// Gets or sets the test runs number.
         /// </summary>
         public int TestRunsNumber { get; set; }
+
+        /// <summary>
+        /// Gets or sets fast mode for MFA
+        /// </summary>
+        public bool IsInFastMfaMode { get; set; }
+
+        /// <summary>
+        /// Gets or sets simple draw mode
+        /// </summary>
+        public bool IsInSimpleDrawMode { get; set; }
     }
 }
