@@ -51,7 +51,7 @@ namespace FFA_Clustering
 
         private TestResultsWindow TestResultsWindow { get; set; }
 
-        private int TabControlMainHeight { get; set; }
+        private int TabControlMainHeight { get; }
         #endregion
 
         #region Constructors
@@ -250,7 +250,6 @@ namespace FFA_Clustering
             var clustersNumber = Convert.ToInt32(TextBoxClustersNumber.Text);
 
             TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
-            Algorithm.IsInFastMfaMode = CheckBoxFastMfaMode.IsChecked != null && (bool)CheckBoxFastMfaMode.IsChecked;
             Algorithm.Initialization(Convert.ToInt32(TextBoxFirefliesNumber.Text), clustersNumber);
             TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
 
@@ -260,7 +259,8 @@ namespace FFA_Clustering
 
                 Algorithm.UpdatePoints(Algorithm.Fireflies.First());
 
-                Draw();
+                if (CheckBoxSimpleDrawMode.IsChecked == false)
+                    Draw();
 
                 if (Algorithm.MfaCanStop)
                     break;
@@ -275,6 +275,7 @@ namespace FFA_Clustering
             LabelInfo.Content = "MFA finished";
             ProgressBarInfo.Value = 100;
             TaskbarItemInfo.ProgressValue = 1;
+            Draw();
             await CanvasFlash();
         }
 
@@ -304,7 +305,8 @@ namespace FFA_Clustering
             {
                 await Algorithm.IterationKMeans();
 
-                Draw();
+                if (CheckBoxSimpleDrawMode.IsChecked == false)
+                    Draw();
                 LabelInfo.Content = $"{LabelInfoRequiredPart}Iteration #{iter}";
                 iter++;
                 ProgressBarInfo.Value = iter * 5;
@@ -317,6 +319,7 @@ namespace FFA_Clustering
                     : $"{LabelInfoRequiredPart}K-means++ finished";
             ProgressBarInfo.Value = 100;
             TaskbarItemInfo.ProgressValue = 1;
+            Draw();
             await CanvasFlash();
         }
 
@@ -386,6 +389,11 @@ namespace FFA_Clustering
         private void Window_Closed(object sender, EventArgs e)
         {
             TestResultsWindow.Close();
+        }
+
+        private void CheckBoxFastMfaMode_Checked(object sender, RoutedEventArgs e)
+        {
+            Algorithm.IsInFastMfaMode = CheckBoxFastMfaMode.IsChecked != null && (bool)CheckBoxFastMfaMode.IsChecked;
         }
         #endregion
 
