@@ -1,4 +1,9 @@
-﻿<Window x:Class="FFA_Clustering.TestResultsWindow"
+﻿<!--<copyright file="MainWindow.xaml.cs" >
+    Created by Max Bondarchuk. Forbidden to use without personal permission.
+    Created as diploma project. Resarch advisor - Yuri Zorin.
+    National Technical University of Ukraine "Kyiv Polytechnic Institute" Kyiv, Ukraine, 2016
+</copyright>-->
+<Window x:Class="FFA_Clustering.TestResultsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
