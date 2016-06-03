@@ -1,4 +1,12 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="MainWindow.xaml.cs" >
+//   Created by Max Bondarchuk. Forbidden to use without personal permission.
+//   Created as diploma project. Resarch advisor - Yuri Zorin.
+//   National Technical University of Ukraine "Kyiv Polytechnic Institute" Kyiv, Ukraine, 2016
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -24,37 +32,89 @@ namespace FFA_Clustering
     public partial class MainWindow
     {
         #region Constants: private
+        /// <summary>
+        /// Half size of a point to draw on canvas
+        /// </summary>
         private const int HalfPointSize = 2;
+
+        /// <summary>
+        /// Milliseconds to delay iteration
+        /// </summary>
         private const int IterationDelay = 125;
+
+        /// <summary>
+        /// Radius of circle to animate click
+        /// </summary>
         private const int ClickDispersion = 15;
         #endregion
 
         #region Properties: private
+        /// <summary>
+        /// Message copied to clipboard after tests
+        /// </summary>
         private string ClipboardMessage { get; set; }
+
+        /// <summary>
+        /// Determines is button to run MFA clicked
+        /// </summary>
         private bool IsRunClicked { get; set; }
 
+        /// <summary>
+        /// PArt to label from tests
+        /// </summary>
         private string LabelInfoRequiredPart { get; set; }
 
+        /// <summary>
+        /// Class to run algorithms
+        /// </summary>
         private Algorithm Algorithm { get; }
+
+        /// <summary>
+        /// For random numbers
+        /// </summary>
         private Random Rand { get; } = new Random();
 
+        /// <summary>
+        /// List of colors to draw clusters
+        /// </summary>
         private List<Color> Clrs { get; } = new List<Color>();
 
+        /// <summary>
+        /// Brush to draw click animation
+        /// </summary>
         // ReSharper disable once PossibleNullReferenceException
         private SolidColorBrush ClickBrush { get; set; } = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF007ACC"));
 
+        /// <summary>
+        /// How much times were clicked on canvas to draw points
+        /// </summary>
         private int CanvasClicks { get; set; }
 
+        /// <summary>
+        /// How much clicks were handled (all points from that clicks are drawn)
+        /// </summary>
         private int CanvasClicksHandled { get; set; }
 
-        private bool AlreadyViolet { get; set; } = true;
+        /// <summary>
+        /// Determines whether status bar is violet
+        /// </summary>
+        private bool IsStatusBarAlreadyViolet { get; set; } = true;
 
+        /// <summary>
+        /// Window for tests results
+        /// </summary>
         private TestResultsWindow TestResultsWindow { get; set; }
 
+        /// <summary>
+        /// Height for 0 tab of left tab control
+        /// </summary>
         private int TabControlMainHeight { get; }
         #endregion
 
         #region Constructors
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -72,6 +132,7 @@ namespace FFA_Clustering
 
             //OpenFile("C:\\Users\\Max\\Downloads\\InitialSet.json");
 
+            // Fill colors
             for (var i = 0; i < 200; i++)
             {
                 var color = Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255));
@@ -87,6 +148,11 @@ namespace FFA_Clustering
             TabControlMainHeight = (int)TabControlMain.Height;
         }
 
+        /// <summary>
+        /// Performs initial steps when window is opened
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void WindowLoaded(object sender, RoutedEventArgs e)
         {
             //            await Task.Delay(1000);
@@ -116,14 +182,18 @@ namespace FFA_Clustering
             //            await Dispatcher.BeginInvoke((Action)(() => TabControlTest.SelectedIndex = 1));
             //            await Task.Delay(1000);
 
-            //            ButtonRunTestsClick(null, null);
+            //            OnButtonRunTestsClick(null, null);
 
             await Task.Delay(0);
         }
-
         #endregion
 
         #region Controller
+        /// <summary>
+        /// Checks inputed value for integer
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CheckTextForInt(object sender, TextCompositionEventArgs e)
         {
             int result;
@@ -132,11 +202,21 @@ namespace FFA_Clustering
         #endregion
 
         #region Mouse events
-        private async void CanvasMainMouseUp(object sender, MouseButtonEventArgs e)
+        /// <summary>
+        /// Canvas mouse up event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void OnCanvasMainMouseUp(object sender, MouseButtonEventArgs e)
         {
             await MouseClick(Mouse.GetPosition(CanvasMain));
         }
 
+        /// <summary>
+        /// Task for canvas mouse up event
+        /// </summary>
+        /// <param name="mouseLocation"></param>
+        /// <returns></returns>
         private async Task MouseClick(Point mouseLocation)
         {
             if (TabControlMain.SelectedIndex == 0 ||
@@ -175,11 +255,11 @@ namespace FFA_Clustering
             #region Draw points
             TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Indeterminate;
             CanvasClicks++;
-            if (AlreadyViolet)
+            if (IsStatusBarAlreadyViolet)
                 LabelInfo.Content = "Drawing points";
             else
                 await ProgressBarAnimation(false, Properties.Resources.DrawingMessage);
-            AlreadyViolet = true;
+            IsStatusBarAlreadyViolet = true;
             for (var i = 0; i < pointsPerClick; i++)
             {
                 int x, y;
@@ -214,14 +294,19 @@ namespace FFA_Clustering
             {
                 TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
                 await ProgressBarAnimation(true, Properties.Resources.ReadyMessage);
-                AlreadyViolet = false;
+                IsStatusBarAlreadyViolet = false;
             }
 
             #endregion
         }
         #endregion
 
-        #region Button events
+        #region Buttons events
+        /// <summary>
+        /// Clears configuration
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void ButtonClearClick(object sender, RoutedEventArgs e)
         {
             Algorithm.Points.Clear();
@@ -232,14 +317,23 @@ namespace FFA_Clustering
             TextBoxXieBeniIndex.Text = string.Empty;
 
             await ProgressBarAnimation(false, Properties.Resources.InitialMessage);
-            AlreadyViolet = true;
+            IsStatusBarAlreadyViolet = true;
         }
 
-        private async void ButtonRunClick(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Runs MFA
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void OnButtonRunClick(object sender, RoutedEventArgs e)
         {
             await ButtonRunClickTask();
         }
 
+        /// <summary>
+        /// Task for ButtonRun click event
+        /// </summary>
+        /// <returns></returns>
         private async Task ButtonRunClickTask()
         {
             IsRunClicked = true;
@@ -262,7 +356,7 @@ namespace FFA_Clustering
                 if (CheckBoxSimpleDrawMode.IsChecked == false)
                     Draw();
 
-                if (Algorithm.MfaCanStop)
+                if (Algorithm.CanMfaStop)
                     break;
 
                 var pbValue = iter * 100 / (double)Algorithm.MaximumGenerations;
@@ -279,11 +373,21 @@ namespace FFA_Clustering
             await CanvasFlash();
         }
 
-        private async void ButtonKMeansClick(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Runs k-means/k-means++
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void OnButtonKMeansClick(object sender, RoutedEventArgs e)
         {
             await ButtonKMeansClickTask(sender);
         }
 
+        /// <summary>
+        /// Task for ButtonKMeans and ButtonKmeansPlusPlus click events
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <returns></returns>
         private async Task ButtonKMeansClickTask(object sender)
         {
             IsRunClicked = false;
@@ -301,7 +405,7 @@ namespace FFA_Clustering
             TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
 
             var iter = 0;
-            while (!Algorithm.KMeansCanStop)
+            while (!Algorithm.CanKmeansStop)
             {
                 await Algorithm.IterationKMeans();
 
@@ -323,7 +427,12 @@ namespace FFA_Clustering
             await CanvasFlash();
         }
 
-        private void WindowPreviewKeyDown(object sender, KeyEventArgs e)
+        /// <summary>
+        /// Handles keyboard keys press events
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
         {
             if ((Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) &&
                 Keyboard.IsKeyDown(Key.S))
@@ -336,6 +445,9 @@ namespace FFA_Clustering
         #endregion
 
         #region Additional methods
+        /// <summary>
+        /// Draws clusters and fireflies (for MFA)
+        /// </summary>
         private void Draw()
         {
             if (Algorithm.Fireflies.Count != 0)
@@ -386,19 +498,34 @@ namespace FFA_Clustering
             }
         }
 
-        private void Window_Closed(object sender, EventArgs e)
+        /// <summary>
+        /// Handles windows close event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnWindowClosed(object sender, EventArgs e)
         {
             TestResultsWindow.Close();
         }
 
-        private void CheckBoxFastMfaMode_Checked(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Changes MFA fast mode
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnCheckBoxFastMfaModeChecked(object sender, RoutedEventArgs e)
         {
             Algorithm.IsInFastMfaMode = CheckBoxFastMfaMode.IsChecked != null && (bool)CheckBoxFastMfaMode.IsChecked;
         }
         #endregion
 
         #region JSON
-        private void MenuItemSaveClick(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// "Save" action in menu click event handler
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnMenuItemSaveClick(object sender, RoutedEventArgs e)
         {
             var dlg = new SaveFileDialog
             {
@@ -412,6 +539,10 @@ namespace FFA_Clustering
             }
         }
 
+        /// <summary>
+        /// Saves configuration to JSON
+        /// </summary>
+        /// <param name="fileName"></param>
         private void SaveToFile(string fileName)
         {
             if (fileName.Equals(string.Empty))
@@ -441,7 +572,12 @@ namespace FFA_Clustering
             file.Close();
         }
 
-        private void MenuItemOpenClick(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// "Open" action in menu click event handler
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnMenuItemOpenClick(object sender, RoutedEventArgs e)
         {
             var dlg = new OpenFileDialog
             {
@@ -455,52 +591,85 @@ namespace FFA_Clustering
             }
         }
 
+        /// <summary>
+        /// Opens JSON and loads configuration
+        /// </summary>
+        /// <param name="fileName"></param>
         private async void OpenFile(string fileName)
         {
-            if (fileName.Equals(string.Empty))
-                return;
+            try
+            {
+                if (fileName.Equals(string.Empty))
+                    return;
 
-            var file = new StreamReader(fileName);
-            var json = file.ReadToEnd();
-            var deserializer = new JavaScriptSerializer();
-            var results = deserializer.Deserialize<JsonObject>(json);
-            file.Close();
+                var file = new StreamReader(fileName);
+                var json = file.ReadToEnd();
+                var deserializer = new JavaScriptSerializer();
+                var results = deserializer.Deserialize<JsonObject>(json);
+                file.Close();
 
-            ButtonClear.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                ButtonClear.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
 
-            Algorithm.Points = new List<ClusterPoint>(results.Points);
-            Algorithm.Fireflies = new List<Firefly>(results.Fireflies);
+                Algorithm.Points = new List<ClusterPoint>(results.Points);
+                Algorithm.Fireflies = new List<Firefly>(results.Fireflies);
 
-            const double precision = .0001;
-            if (Math.Abs(results.SumOfSquaredError + 1) > precision)
-                TextBoxSumOfSquaredError.Text = results.SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
+                const double precision = .0001;
+                if (Math.Abs(results.SumOfSquaredError + 1) > precision)
+                    TextBoxSumOfSquaredError.Text = results.SumOfSquaredError.ToString(CultureInfo.InvariantCulture);
 
-            if (Math.Abs(results.SilhouetteMethod + 1) > precision)
-                TextBoxSilhouetteMethod.Text = results.SilhouetteMethod.ToString(CultureInfo.InvariantCulture);
+                if (Math.Abs(results.SilhouetteMethod + 1) > precision)
+                    TextBoxSilhouetteMethod.Text = results.SilhouetteMethod.ToString(CultureInfo.InvariantCulture);
 
-            if (Math.Abs(results.XieBeniIndex + 1) > precision)
-                TextBoxXieBeniIndex.Text = results.XieBeniIndex.ToString(CultureInfo.InvariantCulture);
+                if (Math.Abs(results.XieBeniIndex + 1) > precision)
+                    TextBoxXieBeniIndex.Text = results.XieBeniIndex.ToString(CultureInfo.InvariantCulture);
 
-            TextBoxClustersNumber.Text = results.ClustersNumber.ToString();
-            TextBoxRunsNumber.Text = results.TestRunsNumber.ToString();
+                TextBoxClustersNumber.Text = results.ClustersNumber.ToString();
+                TextBoxRunsNumber.Text = results.TestRunsNumber.ToString();
 
-            CheckBoxFastMfaMode.IsChecked = results.IsInFastMfaMode;
-            CheckBoxSimpleDrawMode.IsChecked = results.IsInSimpleDrawMode;
+                CheckBoxFastMfaMode.IsChecked = results.IsInFastMfaMode;
+                CheckBoxSimpleDrawMode.IsChecked = results.IsInSimpleDrawMode;
 
-            Draw();
-            if (Algorithm.Points.Count != 0)
-                await ProgressBarAnimation(true, Properties.Resources.ReadyMessage);
+                Draw();
+                if (Algorithm.Points.Count != 0)
+                    await ProgressBarAnimation(true, Properties.Resources.ReadyMessage);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Cannot load this file");
+            }
         }
         #endregion
 
         #region Tests
+        /// <summary>
+        /// Class to print data to ListView on TestResultsWindow
+        /// </summary>
         [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
         private class TestListViewItem
         {
+            /// <summary>
+            /// Name of algorithm
+            /// </summary>
             public string Algorithm { get; set; }
+
+            /// <summary>
+            /// SSE value
+            /// </summary>
             public string SumOfSquaredError { get; set; }
+
+            /// <summary>
+            /// Deviation for SSE (deviation from average SSE value in %)
+            /// </summary>
             public string Deviation { get; set; }
+
+            /// <summary>
+            /// SM value
+            /// </summary>
             public string SilhouetteMethod { get; set; }
+
+            /// <summary>
+            /// XB value
+            /// </summary>
             public string XieBeniIndex { get; set; }
         }
 
@@ -557,7 +726,12 @@ namespace FFA_Clustering
             };
         }
 
-        private async void ButtonRunTestsClick(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Handles click event for button to run tests
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void OnButtonRunTestsClick(object sender, RoutedEventArgs e)
         {
             ClipboardMessage = string.Empty;
             TestResultsWindow = new TestResultsWindow();
@@ -580,7 +754,12 @@ namespace FFA_Clustering
         #endregion
 
         #region Animation
-        private void TabControlMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        /// <summary>
+        /// Animation for switch between left Tabcontrol tabs
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnTabControlMainSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var da = new DoubleAnimation
             {
@@ -590,6 +769,11 @@ namespace FFA_Clustering
             TabControlMain.BeginAnimation(HeightProperty, da);
         }
 
+        /// <summary>
+        /// Animates click on canvas
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         private async Task ClickFlash(Shape line)
         {
             const int animationWait = 150;
@@ -612,6 +796,10 @@ namespace FFA_Clustering
             cb.BeginAnimation(SolidColorBrush.ColorProperty, da1);
         }
 
+        /// <summary>
+        /// Animates algorithm execution end
+        /// </summary>
+        /// <returns></returns>
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
         private async Task CanvasFlash()
         {

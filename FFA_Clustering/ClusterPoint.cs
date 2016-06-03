@@ -1,5 +1,16 @@
-﻿namespace FFA_Clustering
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ClusterPoint.cs" >
+//   Created by Max Bondarchuk. Forbidden to use without personal permission.
+//   Created as diploma project. Resarch advisor - Yuri Zorin.
+//   National Technical University of Ukraine "Kyiv Polytechnic Institute" Kyiv, Ukraine, 2016
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace FFA_Clustering
 {
+    /// <summary>
+    /// Represents one point on the canvas from configuration
+    /// </summary>
     public class ClusterPoint
     {
         /// <summary>

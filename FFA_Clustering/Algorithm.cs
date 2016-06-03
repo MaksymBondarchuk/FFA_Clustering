@@ -1,46 +1,108 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Algorithm.cs" >
+//   Created by Max Bondarchuk. Forbidden to use without personal permission.
+//   Created as diploma project. Resarch advisor - Yuri Zorin.
+//   National Technical University of Ukraine "Kyiv Polytechnic Institute" Kyiv, Ukraine, 2016
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace FFA_Clustering
 {
+    /// <summary>
+    /// Realizes Modified fireflies optimization algorithm for data clustering.
+    /// Realizes K-means, K-means++
+    /// </summary>
     public class Algorithm
     {
         #region Constants: public
+        /// <summary>
+        /// Number of iterations for MFA
+        /// </summary>
         public const int MaximumGenerations = 100;
         #endregion
 
         #region Constants: private
+        /// <summary>
+        /// If for this count of iterations SSE won't change on ValueToStop
+        /// algorithm will stop
+        /// </summary>
         private const int IterationsToWait = 10;
+        /// <summary>
+        /// Value SSE has change to for continue MFA in fast mode
+        /// </summary>
         private const int ValueToStop = 1000;
         #endregion
 
         #region Properties: public
-        public bool MfaCanStop { get; private set; }
+        /// <summary>
+        /// Determine does MFA can stop in fast mode
+        /// </summary>
+        public bool CanMfaStop { get; private set; }
+
+        /// <summary>
+        /// Range for X-coordinate
+        /// </summary>
         public int RangeX { private get; set; }
+
+        /// <summary>
+        /// Range for Y-coordinate
+        /// </summary>
         public int RangeY { private get; set; }
 
+        /// <summary>
+        /// Configuration points
+        /// </summary>
         public List<ClusterPoint> Points { get; set; } = new List<ClusterPoint>();
 
+        /// <summary>
+        /// Fireflies
+        /// </summary>
         public List<Firefly> Fireflies { get; set; } = new List<Firefly>();
 
-        public bool KMeansCanStop { get; private set; }
+        /// <summary>
+        /// Determine does K-Means can stop
+        /// </summary>
+        public bool CanKmeansStop { get; private set; }
 
+        /// <summary>
+        /// How many fireflies moved on last MFA iteration (one firefly can move more than once)
+        /// </summary>
         public int MovesOnLastIteration { get; private set; }
 
+        /// <summary>
+        /// Determine does MFA works in fast mode
+        /// </summary>
         public bool IsInFastMfaMode { private get; set; }
         #endregion
 
         #region Properties: private
+        /// <summary>
+        /// MFA delta
+        /// </summary>
         private double Delta { get; set; }
 
+        /// <summary>
+        /// For random generation
+        /// </summary>
         private Random Rand { get; } = new Random();
 
+        /// <summary>
+        /// All SSE values for the best firefly
+        /// </summary>
         private List<double> SseHistory { get; } = new List<double>();
         #endregion
 
-        #region Additional 
+        #region Additional
+        /// <summary>
+        /// Adds fireflies with random location
+        /// </summary>
+        /// <param name="firefliesNumber">Number of fireflies</param>
+        /// <param name="clustersNumber">Number of clusters in solution</param>
         private void AddRandomFireflies(int firefliesNumber, int clustersNumber)
         {
             for (var iter = 0; iter < firefliesNumber; iter++)
@@ -60,6 +122,10 @@ namespace FFA_Clustering
             }
         }
 
+        /// <summary>
+        /// Updates what points belong to each firefly's clusters
+        /// </summary>
+        /// <param name="firefly">Firefly update points to</param>
         private void FillCentroidPoints(Firefly firefly)
         {
             foreach (var cp in firefly.CentroidPoints)
@@ -81,6 +147,10 @@ namespace FFA_Clustering
             }
         }
 
+        /// <summary>
+        /// Updates configuration points to their belonging to clusters
+        /// </summary>
+        /// <param name="firefly"></param>
         public void UpdatePoints(Firefly firefly)
         {
             for (var i = 0; i < firefly.Centroids.Count; i++)
@@ -89,7 +159,11 @@ namespace FFA_Clustering
         #endregion
 
         #region Clustering validation criteria
-
+        /// <summary>
+        /// SSE
+        /// </summary>
+        /// <param name="firefly">Firefly SSE is for</param>
+        /// <returns></returns>
         private double SumOfSquaredError(Firefly firefly)
         {
             foreach (var t in firefly.CentroidPoints)
@@ -115,6 +189,11 @@ namespace FFA_Clustering
             return sse;
         }
 
+        /// <summary>
+        /// SM
+        /// </summary>
+        /// <param name="firefly">Firefly SM is for</param>
+        /// <returns></returns>
         public double SilhouetteMethod(Firefly firefly)
         {
             if (firefly == null)
@@ -142,6 +221,11 @@ namespace FFA_Clustering
             return s / Points.Count;
         }
 
+        /// <summary>
+        /// XB
+        /// </summary>
+        /// <param name="firefly">Firefly XB is for</param>
+        /// <returns></returns>
         public double XieBeniIndex(Firefly firefly)
         {
             var sum = firefly.Centroids.Select((t, i) => firefly.CentroidPoints[i].Sum(pIdx =>
@@ -157,6 +241,11 @@ namespace FFA_Clustering
         #endregion
 
         #region MFA
+        /// <summary>
+        /// Initialization of MFA
+        /// </summary>
+        /// <param name="firefliesNumber"></param>
+        /// <param name="clustersNumber"></param>
         public void Initialization(int firefliesNumber, int clustersNumber)
         {
             Fireflies.Clear();
@@ -167,9 +256,14 @@ namespace FFA_Clustering
             RankSwarm();
         }
 
+        /// <summary>
+        /// One MFA iteration
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns>Task</returns>
         public async Task Iteration(int number)
         {
-            MfaCanStop = true;
+            CanMfaStop = true;
             MovesOnLastIteration = 0;
 
             var alphaT = 1e-3 * Math.Pow(Delta, number);
@@ -183,7 +277,7 @@ namespace FFA_Clustering
                         continue;
 
                     MoveTowards(i, j, alphaT, lambdaI);
-                    MfaCanStop = false;
+                    CanMfaStop = false;
                 }
             }
 
@@ -194,16 +288,26 @@ namespace FFA_Clustering
 
             if (IsInFastMfaMode && IterationsToWait <= SseHistory.Count &&
                 Math.Abs(SseHistory[number - IterationsToWait] - bestFirefly.SumOfSquaredError) < ValueToStop)
-                MfaCanStop = true;
+                CanMfaStop = true;
 
             await Task.Delay(0);
         }
 
+        /// <summary>
+        /// Sort fireflies according to SSE value
+        /// </summary>
         private void RankSwarm()
         {
             Fireflies.Sort((f1, f2) => f1.SumOfSquaredError.CompareTo(f2.SumOfSquaredError));
         }
 
+        /// <summary>
+        /// Moves firefly toward firefly
+        /// </summary>
+        /// <param name="idx">Index of firefly to move</param>
+        /// <param name="idxTo">Index of firefly move to</param>
+        /// <param name="alpha">MFA alpha</param>
+        /// <param name="lambda">MFA lambda</param>
         private void MoveTowards(int idx, int idxTo, double alpha, double lambda)
         {
             var firefly = Fireflies[idx];
@@ -258,7 +362,12 @@ namespace FFA_Clustering
                 MovesOnLastIteration++;
         }
 
-
+        /// <summary>
+        /// Calculates Gaussian random
+        /// </summary>
+        /// <param name="mue">Mue</param>
+        /// <param name="sigma">Sigma</param>
+        /// <returns></returns>
         private double GaussianRandom(double mue, double sigma)
         {
             double x1;
@@ -277,6 +386,11 @@ namespace FFA_Clustering
             return mue + sigma * y;
         }
 
+        /// <summary>
+        /// Calculates Mantegna random
+        /// </summary>
+        /// <param name="lambda">Levy flight step size</param>
+        /// <returns></returns>
         private double MantegnaRandom(double lambda)
         {
             var sigmaX = SpecialFunction.lgamma(lambda + 1) * Math.Sin(Math.PI * lambda * .5);
@@ -291,18 +405,26 @@ namespace FFA_Clustering
         #endregion
 
         #region K-means
+        /// <summary>
+        /// K-means initialization
+        /// </summary>
+        /// <param name="clustersNumber">Number of clusters</param>
         public void InitializationKMeans(int clustersNumber)
         {
-            KMeansCanStop = false;
+            CanKmeansStop = false;
             Fireflies.Clear();
             AddRandomFireflies(1, clustersNumber);
             FillCentroidPoints(Fireflies.First());
             MovesOnLastIteration = -1;
         }
 
+        /// <summary>
+        /// K-means++ initialization
+        /// </summary>
+        /// <param name="clustersNumber">Number of clusters</param>
         public void InitializationKMeansPlusPlus(int clustersNumber)
         {
-            KMeansCanStop = false;
+            CanKmeansStop = false;
             Fireflies.Clear();
 
             var firefly = new Firefly();
@@ -354,6 +476,10 @@ namespace FFA_Clustering
             FillCentroidPoints(Fireflies.First());
         }
 
+        /// <summary>
+        /// One K-means/K-means++ iteration
+        /// </summary>
+        /// <returns>Task</returns>
         public async Task IterationKMeans()
         {
             var firefly = Fireflies.First();
@@ -384,7 +510,7 @@ namespace FFA_Clustering
             FillCentroidPoints(firefly);
             UpdatePoints(firefly);
 
-            if (finalPointsNumber == firefly.Centroids.Count) KMeansCanStop = true;
+            if (finalPointsNumber == firefly.Centroids.Count) CanKmeansStop = true;
 
             await Task.Delay(0);
         }

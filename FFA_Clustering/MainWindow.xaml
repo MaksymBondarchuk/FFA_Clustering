@@ -4,23 +4,23 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="FFA Clustering" Height="720" Width="1280" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" WindowState="Maximized" PreviewKeyDown="WindowPreviewKeyDown" Loaded="WindowLoaded" Closed="Window_Closed">
+        Title="FFA Clustering" Height="720" Width="1280" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" WindowState="Maximized" PreviewKeyDown="OnWindowPreviewKeyDown" Loaded="WindowLoaded" Closed="OnWindowClosed">
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo />
     </Window.TaskbarItemInfo>
     <Grid Background="White">
-        <Canvas x:Name="CanvasMain" Margin="210,35,10,28" MouseUp="CanvasMainMouseUp" Background="#00000000"/>
+        <Canvas x:Name="CanvasMain" Margin="210,35,10,28" MouseUp="OnCanvasMainMouseUp" Background="#00000000"/>
         <Menu Height="20" VerticalAlignment="Top" Background="{x:Null}">
             <MenuItem Header="File">
-                <MenuItem x:Name="MenuItemSave" Header="Save" Click="MenuItemSaveClick" IsEnabled="{DynamicResource IsMenuItemSaveEnabled}"/>
-                <MenuItem x:Name="MenuItemOpen" Header="Open" Click="MenuItemOpenClick"/>
+                <MenuItem x:Name="MenuItemSave" Header="Save" Click="OnMenuItemSaveClick" IsEnabled="{DynamicResource IsMenuItemSaveEnabled}"/>
+                <MenuItem x:Name="MenuItemOpen" Header="Open" Click="OnMenuItemOpenClick"/>
             </MenuItem>
         </Menu>
         <StatusBar x:Name="StatusBarMain" Height="23" VerticalAlignment="Bottom" Background="#FF68217A">
             <Label x:Name="LabelInfo" Content="Draw some points or open a file" HorizontalAlignment="Center" VerticalAlignment="Top" VerticalContentAlignment="Center" Foreground="White" Padding="0" Width="410"/>
             <ProgressBar x:Name="ProgressBarInfo" BorderBrush="#FF4CA2DB" Foreground="#FF4CA2DB" VerticalAlignment="Bottom" UseLayoutRounding="False" Height="17" Background="{x:Null}" Width="265" HorizontalAlignment="Right" BorderThickness="2,0"/>
         </StatusBar>
-        <TabControl x:Name="TabControlMain" Margin="10,25,0,0" HorizontalAlignment="Left" Width="200" SelectionChanged="TabControlMain_SelectionChanged" Height="585" VerticalAlignment="Top">
+        <TabControl x:Name="TabControlMain" Margin="10,25,0,0" HorizontalAlignment="Left" Width="200" SelectionChanged="OnTabControlMainSelectionChanged" Height="585" VerticalAlignment="Top">
             <TabItem Header="Test mode">
                 <Grid IsEnabled="{DynamicResource IsMenuItemSaveEnabled}">
                     <TextBox x:Name="TextBoxSilhouetteMethod" HorizontalAlignment="Left" Height="23" Margin="11,81,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="110" VerticalContentAlignment="Center"/>
@@ -34,16 +34,16 @@
                     <TabControl x:Name="TabControlTest" HorizontalAlignment="Left" Height="125" Margin="10,270,0,0" VerticalAlignment="Top" Width="137">
                         <TabItem Header="Run algorithm">
                             <Grid>
-                                <Button x:Name="ButtonMfa" Content="MFA" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top" Width="110" Click="ButtonRunClick" TabIndex="0"/>
-                                <Button x:Name="ButtonKmeans" Content="K-means" HorizontalAlignment="Left" Margin="10,17,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeansClick"/>
-                                <Button x:Name="ButtonKmeansPlusPlus" Content="K-means++" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Width="110" Click="ButtonKMeansClick"/>
+                                <Button x:Name="ButtonMfa" Content="MFA" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top" Width="110" Click="OnButtonRunClick" TabIndex="0"/>
+                                <Button x:Name="ButtonKmeans" Content="K-means" HorizontalAlignment="Left" Margin="10,17,0,0" VerticalAlignment="Top" Width="110" Click="OnButtonKMeansClick"/>
+                                <Button x:Name="ButtonKmeansPlusPlus" Content="K-means++" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Width="110" Click="OnButtonKMeansClick"/>
                             </Grid>
                         </TabItem>
                         <TabItem Header="Test">
                             <Grid>
                                 <TextBox x:Name="TextBoxRunsNumber" HorizontalAlignment="Left" Height="23" Margin="10,36,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt" VerticalContentAlignment="Center"/>
                                 <Label Content="Runs number" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-                                <Button Content="Run" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" Width="110" TabIndex="0" Click="ButtonRunTestsClick" IsDefault="True"/>
+                                <Button Content="Run" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" Width="110" TabIndex="0" Click="OnButtonRunTestsClick" IsDefault="True"/>
                             </Grid>
                         </TabItem>
                     </TabControl>
@@ -52,7 +52,7 @@
                     <TextBox x:Name="TextBoxFirefliesNumber" HorizontalAlignment="Left" Height="23" Margin="11,524,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="110" PreviewTextInput="CheckTextForInt" VerticalContentAlignment="Center"/>
                     <Label Content="Fireflies number" HorizontalAlignment="Left" Margin="11,498,0,0" VerticalAlignment="Top"/>
                     <CheckBox x:Name="CheckBoxSimpleDrawMode" Content="Simple draw mode" Margin="10,250,47,292" ToolTip="Won't draw movemnts on each iteration. Won't calculate clustering validation criteria on each iteration"/>
-                    <CheckBox x:Name="CheckBoxFastMfaMode" Content="Fast MFA mode" Margin="10,227,74,312" ToolTip="If the best firefly won't change his SSE on specified value for specified number of iterations, algorithm will stop" Checked="CheckBoxFastMfaMode_Checked"/>
+                    <CheckBox x:Name="CheckBoxFastMfaMode" Content="Fast MFA mode" Margin="10,227,74,312" ToolTip="If the best firefly won't change his SSE on specified value for specified number of iterations, algorithm will stop" Checked="OnCheckBoxFastMfaModeChecked"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Draw mode">
