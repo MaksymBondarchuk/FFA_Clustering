@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MainWindow.xaml.cs" >
-//   Created by Max Bondarchuk. Forbidden to use without personal permission.
+//   Copyright (c) 2016 Maxym Bondarchuk, Yuri Zorin
 //   Created as diploma project. Resarch advisor - Yuri Zorin.
 //   National Technical University of Ukraine "Kyiv Polytechnic Institute" Kyiv, Ukraine, 2016
 // </copyright>
