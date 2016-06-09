@@ -107,7 +107,6 @@
     <None Include="Data sets\3000.json" />
     <None Include="Data sets\500.json" />
     <None Include="Data sets\5000.json" />
-    <None Include="LICENSE.md" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
