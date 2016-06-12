@@ -307,7 +307,7 @@ namespace FFA_Clustering
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void ButtonClearClick(object sender, RoutedEventArgs e)
+        private async void OnButtonClearClick(object sender, RoutedEventArgs e)
         {
             Algorithm.Points.Clear();
             CanvasMain.Children.Clear();
@@ -318,6 +318,9 @@ namespace FFA_Clustering
 
             await ProgressBarAnimation(false, Properties.Resources.InitialMessage);
             IsStatusBarAlreadyViolet = true;
+
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
+            TaskbarItemInfo.ProgressValue = 0;
         }
 
         /// <summary>
@@ -741,7 +744,7 @@ namespace FFA_Clustering
             for (var i = 0; i < 200; i++)
                 Clrs.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
             TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.KmeansPlusPlus));
-            TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
+            //TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
             TestResultsWindow.ShowDialog();
             LabelInfoRequiredPart = string.Empty;
             LabelInfo.Content = "Test are finished";

@@ -73,7 +73,7 @@
                         </Grid>
                     </GroupBox>
                     <CheckBox x:Name="CheckBoxShitMode" Content="Shit mode" Width="100" Margin="10,239,79,353"/>
-                    <Button x:Name="ButtonClear" Content="Clear" HorizontalAlignment="Left" Margin="10,205,0,0" Width="110" Height="20" VerticalAlignment="Top" Click="ButtonClearClick" Grid.ColumnSpan="2" TabIndex="0" IsCancel="True"/>
+                    <Button x:Name="ButtonClear" Content="Clear" HorizontalAlignment="Left" Margin="10,205,0,0" Width="110" Height="20" VerticalAlignment="Top" Click="OnButtonClearClick" Grid.ColumnSpan="2" TabIndex="0" IsCancel="True"/>
                 </Grid>
             </TabItem>
         </TabControl>
