@@ -744,7 +744,7 @@ namespace FFA_Clustering
             for (var i = 0; i < 200; i++)
                 Clrs.Add(Color.FromRgb((byte)Rand.Next(255), (byte)Rand.Next(255), (byte)Rand.Next(255)));
             TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.KmeansPlusPlus));
-            //TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
+            TestResultsWindow.ListViewInfoTestResults.Items.Add(await GetResult(Properties.Resources.ModifiedFireflyAlgorithm));
             TestResultsWindow.ShowDialog();
             LabelInfoRequiredPart = string.Empty;
             LabelInfo.Content = "Test are finished";
